@@ -1,128 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <title>입시생 레벨 테스트</title>
+  <meta charset="UTF-8">
+  <title>경희실용음악 입시 레벨 테스트</title>
   <style>
-    /* 전체 배경 */
+    /* 원장님 스타일 가이드 유지 */
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #dbe6f6, #cfdff2); /* 연한 블루 그라데이션 */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #dbe6f6, #cfdff2);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; margin: 0; padding: 20px;
     }
 
-    /* 카드 */
     .card {
-      background: #fefefe; /* 밝은 카드 */
+      background: #fefefe;
       padding: 40px 35px;
       border-radius: 20px;
-      box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 15px 40px rgba(0,0,0,0.15);
-      width: 360px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      width: 400px;
       text-align: center;
-      transition: transform 0.2s ease, box-shadow 0.3s ease;
     }
 
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 0 20px 50px rgba(0,0,0,0.2);
-    }
+    h2 { margin-bottom: 5px; font-size: 22px; color: #2c3e50; }
+    .student-info { font-size: 14px; color: #3498db; margin-bottom: 25px; font-weight: bold; }
 
-    h2 {
-      margin-bottom: 25px;
-      font-size: 22px;
-      color: #2c3e50;
-      font-weight: bold;
-    }
-
-    /* 입력 필드 */
-    .field {
-      text-align: left;
-      margin-bottom: 18px;
-    }
-
-    label {
-      display: block;
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 5px;
-      font-weight: 500;
-    }
+    .field { text-align: left; margin-bottom: 15px; }
+    label { display: block; font-size: 14px; color: #555; margin-bottom: 5px; font-weight: 500; }
 
     input[type=number] {
-      width: 100%;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      transition: all 0.2s;
+      width: 100%; padding: 10px; border-radius: 10px;
+      border: 1px solid #ccc; font-size: 14px; transition: all 0.2s;
     }
 
-    input[type=number]:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 5px rgba(102,126,234,0.5);
-      outline: none;
+    input:focus {
+      border-color: #667eea; box-shadow: 0 0 5px rgba(102,126,234,0.5); outline: none;
     }
 
-    /* 버튼 */
     button {
-      margin-top: 25px;
-      padding: 12px 25px;
-      border: none;
-      background: #667eea;
-      color: white;
-      border-radius: 12px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      width: 100%;
+      margin-top: 25px; padding: 12px 25px; border: none;
+      background: #667eea; color: white; border-radius: 12px;
+      cursor: pointer; font-size: 16px; font-weight: bold; width: 100%;
       transition: background 0.3s, transform 0.2s;
     }
 
-    button:hover {
-      background: #5a67d8;
-      transform: translateY(-2px);
-    }
-
-    /* 반응형 */
-    @media(max-width:400px){
-      .card { width:90%; padding:30px 20px; }
-    }
+    button:hover { background: #5a67d8; transform: translateY(-2px); }
   </style>
 </head>
 <body>
 
 <div class="card">
-  <h2>입시생 레벨 테스트</h2>
+  <h2>레벨 테스트 평가</h2>
+  <div id="display-info" class="student-info"></div>
 
-  <div class="field"><label>이론</label><input type="number" id="a" min="0" max="100"></div>
-  <div class="field"><label>초견능력</label><input type="number" id="b" min="0" max="100"></div>
-  <div class="field"><label>리듬감</label><input type="number" id="c" min="0" max="100"></div>
-  <div class="field"><label>음정감</label><input type="number" id="d" min="0" max="100"></div>
-  <div class="field"><label>테크닉</label><input type="number" id="e" min="0" max="100"></div>
-  <div class="field"><label>나이</label><input type="number" id="f" min="0" max="100"></div>
-  <div class="field"><label>장르의 이해</label><input type="number" id="g" min="0" max="100"></div>
-  <div class="field"><label>터치 및 톤</label><input type="number" id="g" min="0" max="100"></div>
+  <div id="dynamic-fields">
+    </div>
 
-  <button onclick="goToResult()">결과 보기</button>
+  <button onclick="goToResult()">최종 리포트 생성</button>
 </div>
 
 <script>
+// 전공별 항목 설정
+const config = {
+  vocalGroup: [
+    { id: 'a', label: '이론' },
+    { id: 'b', label: '시창' },
+    { id: 'c', label: '음감' },
+    { id: 'd', label: '리듬감' },
+    { id: 'e', label: '발음' },
+    { id: 'f', label: '악기능력' },
+    { id: 'g', label: '장르의 이해' },
+    { id: 'h', label: '나이' },
+    { id: 'i', label: '톤' }
+  ],
+  instrumentGroup: [
+    { id: 'a', label: '이론' },
+    { id: 'b', label: '초견능력' },
+    { id: 'c', label: '리듬감' },
+    { id: 'd', label: '음감' },
+    { id: 'e', label: '테크닉' },
+    { id: 'f', label: '나이' },
+    { id: 'g', label: '장르의 이해' },
+    { id: 'h', label: '터치 및 톤' }
+  ]
+};
+
+// 1. 이전 페이지에서 저장한 데이터 불러오기
+const clientData = JSON.parse(localStorage.getItem("clientData"));
+
+if (!clientData) {
+  alert("인적사항 데이터가 없습니다. 첫 페이지로 이동합니다.");
+  window.location.href = "index.html";
+}
+
+// 2. 상단에 학생 정보 표시
+document.getElementById('display-info').innerText = `${clientData.name} 학생 (${clientData.major})`;
+
+// 3. 전공에 맞는 필드 생성
+const isVocal = (clientData.major === '보컬' || clientData.major === '싱송');
+const targetFields = isVocal ? config.vocalGroup : config.instrumentGroup;
+
+const container = document.getElementById('dynamic-fields');
+container.innerHTML = targetFields.map(f => `
+  <div class="field">
+    <label>${f.label}</label>
+    <input type="number" id="${f.id}" min="0" max="100" placeholder="0-100 점수 입력">
+  </div>
+`).join('');
+
+// 4. 결과 페이지로 이동
 function goToResult() {
-  const data = {
-    a: document.getElementById('a').value || 0,
-    b: document.getElementById('b').value || 0,
-    c: document.getElementById('c').value || 0,
-    d: document.getElementById('d').value || 0,
-    e: document.getElementById('e').value || 0,
-    f: document.getElementById('f').value || 0,
-    g: document.getElementById('g').value || 0
-  };
+  const data = {};
+  let allFilled = true;
+
+  targetFields.forEach(f => {
+    const val = document.getElementById(f.id).value;
+    if (!val) allFilled = false;
+    data[f.id] = val || 0;
+  });
+
+  if (!allFilled) {
+    if (!confirm("입력되지 않은 항목이 있습니다. 그대로 진행할까요?")) return;
+  }
 
   localStorage.setItem("myData", JSON.stringify(data));
-  window.location.href = "result.html"; // 결과 페이지 이동
+  window.location.href = "result.html";
 }
 </script>
 
