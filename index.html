@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
   <title>경희실용음악 입시 리포트 - 내담자 인적사항</title>
   <style>
-    /* 전체 배경 */
+    /* 핵심: 모든 요소의 너비 계산 방식을 통일합니다 */
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #dbe6f6, #cfdff2); /* test.html과 동일 배경 */
+      font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #dbe6f6, #cfdff2);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -14,20 +19,14 @@
       margin: 0;
     }
 
-    /* 카드 */
     .card {
-      background: #fefefe; /* 밝은 카드 */
+      background: #fefefe;
       padding: 40px 35px;
       border-radius: 20px;
       box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 15px 40px rgba(0,0,0,0.15);
-      width: 360px;
+      width: 380px;
       text-align: center;
       transition: transform 0.2s ease, box-shadow 0.3s ease;
-    }
-
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 0 20px 50px rgba(0,0,0,0.2);
     }
 
     h2 {
@@ -37,7 +36,6 @@
       font-weight: bold;
     }
 
-    /* 입력 필드 */
     .field {
       text-align: left;
       margin-bottom: 18px;
@@ -51,24 +49,39 @@
       font-weight: 500;
     }
 
-    input[type=text] {
+    /* 모든 입력창 스타일 통합 (text, date, select 모두 동일하게) */
+    input[type=text],
+    input[type=date],
+    select#major {
       width: 100%;
       padding: 10px;
       border-radius: 10px;
       border: 1px solid #ccc;
       font-size: 14px;
+      background-color: #fefefe;
       transition: all 0.2s;
+      display: block; /* 줄바꿈 확실히 */
     }
 
-    input[type=text]:focus {
+    input:focus, select:focus {
       border-color: #667eea;
       box-shadow: 0 0 5px rgba(102,126,234,0.5);
       outline: none;
     }
 
-    /* 버튼 */
+    /* 전공 선택 박스(Select) 전용 화살표 디자인 */
+    select#major {
+      appearance: none;
+      -webkit-appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 1em;
+      cursor: pointer;
+    }
+
     button {
-      margin-top: 25px;
+      margin-top: 15px;
       padding: 12px 25px;
       border: none;
       background: #667eea;
@@ -85,11 +98,6 @@
       background: #5a67d8;
       transform: translateY(-2px);
     }
-
-    /* 반응형 */
-    @media(max-width:400px){
-      .card { width:90%; padding:30px 20px; }
-    }
   </style>
 </head>
 <body>
@@ -99,93 +107,44 @@
 
   <div class="field"><label>이름</label><input type="text" id="name"></div>
   <div class="field"><label>나이</label><input type="text" id="age"></div>
+  
   <div class="field">
-  <label for="major">전공</label>
-  <select id="major">
-    <option value="">전공을 선택하세요</option>
-    <option value="보컬">보컬</option>
-    <option value="기악">기악</option>
-    <option value="작곡">작곡</option>
-  </select>
-</div>
+    <label for="major">전공</label>
+    <select id="major">
+      <option value="">전공을 선택하세요</option>
+      <option value="보컬">보컬</option>
+      <option value="기악">기악</option>
+      <option value="작곡">작곡</option>
+    </select>
+  </div>
+
   <div class="field">
-  <label>내담일</label>
-  <input type="date" id="date">
-</div>
-
-<style>
-input[type=date] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  background-color: #fefefe;
-  transition: all 0.2s;
-  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-}
-
-input[type=date]:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 5px rgba(102,126,234,0.5);
-  outline: none;
-}
-
-/* Safari 등 WebKit에서 화살표 제거 */
-input[type=date]::-webkit-inner-spin-button,
-input[type=date]::-webkit-calendar-picker-indicator {
-  display: block;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  filter: invert(0.4); /* 조금 연하게 표시 */
-}
-
-select[type=major] {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  font-size: 14px;
-  background-color: #fefefe;
-  transition: all 0.2s;
-  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-}
-
-input[type=major]:focus {
-  border-color: #667eea;
-  box-shadow: 0 0 5px rgba(102,126,234,0.5);
-  outline: none;
-}
-input[type=major]::-webkit-inner-spin-button,
-input[type=major]::-webkit-calendar-picker-indicator {
-  display: block;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-  filter: invert(0.4); /* 조금 연하게 표시 */
-}
-
-</style>
-
-  <div class="field"><label>연락처</label><input type="text" id="phone"></div>
- 
+    <label>내담일</label>
+    <input type="date" id="date">
+  </div>
+  
   <button onclick="goToTest()">다음 단계: 레벨 테스트</button>
 </div>
 
 <script>
 function goToTest() {
+  const name = document.getElementById('name').value;
+  const major = document.getElementById('major').value;
+
+  if(!name || !major) {
+    alert("이름과 전공을 입력해주세요.");
+    return;
+  }
+
   const clientData = {
-    name: document.getElementById('name').value,
+    name: name,
     age: document.getElementById('age').value,
-    major: document.getElementById('major').value,
-    date: document.getElementById('date').value,
-    phone: document.getElementById('phone').value,
-    address: document.getElementById('address').value
+    major: major,
+    date: document.getElementById('date').value
   };
 
   localStorage.setItem("clientData", JSON.stringify(clientData));
-  window.location.href = "test.html"; // test.html로 이동
+  window.location.href = "test.html";
 }
 </script>
 
