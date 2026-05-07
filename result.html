@@ -8,15 +8,12 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* 1. 전체 레이아웃 중앙 정렬 보강 */
+/* 1. 레이아웃 중앙 정렬 - flex 제거하고 기본 block 정렬 사용 */
 .container {
   max-width: 1000px;
   margin: 0 auto;
   padding: 20px;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* 내부 요소들을 가로축 중앙으로 */
 }
 
 body {
@@ -27,19 +24,18 @@ body {
   color: #2c3e50;
 }
 
-h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; letter-spacing: -1px; width: 100%; }
+h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; letter-spacing: -1px; }
 
-/* 2. 테이블 쏠림 방지 설정 */
+/* 2. 테이블 강제 중앙 정렬 및 너비 고정 */
 table {
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto 25px auto; /* 위아래 간격 유지 및 좌우 자동 중앙 정렬 */
+  width: 100% !important;
   border-collapse: collapse; 
+  margin: 0 auto 25px auto; 
   background: white; 
   border-radius: 16px; 
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-  table-layout: fixed; /* 레이아웃 고정 */
+  table-layout: fixed;
 }
 
 th, td { 
@@ -56,14 +52,11 @@ th {
   font-size: 15px; 
 }
 
-/* 3. 인적사항 셀 너비 고정 (쏠림 방지 핵심) */
+/* 인적사항 셀 너비 비율 고정 */
 .info-label {
   font-weight: bold; 
   background: #fcfcfc; 
-  width: 15% !important;
-}
-.info-input-cell {
-  width: 35% !important;
+  width: 150px; /* 고정 너비 부여 */
 }
 
 /* 입력 필드 스타일 */
@@ -75,9 +68,7 @@ input[type=text] {
   border: 1px solid #dee2e6; 
   font-size: 14px; 
   text-align: center;
-  transition: all 0.3s;
 }
-input[type=text]:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52,152,219,0.1); }
 
 textarea { 
   width: 100%;
@@ -88,20 +79,18 @@ textarea {
   font-size: 14px;
   resize: vertical; 
   height: 120px;
-  line-height: 1.5;
 }
 
-/* 추천 아티스트 트렌디 스타일 */
+/* 3. 추천 아티스트 영역 (사라짐 방지) */
 #recommend-content {
   text-align: left;
-  padding: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-start;
+  padding: 5px;
+  display: block; /* flex에서 block으로 변경하여 가독성 확보 */
+  min-height: 40px;
 }
 
-#recommend-content span {
+.artist-tag {
+  display: inline-block;
   background: #ebf5ff;
   color: #2980b9;
   padding: 6px 14px;
@@ -109,18 +98,22 @@ textarea {
   font-size: 13px;
   font-weight: 600;
   border: 1px solid #d0e8ff;
+  margin: 4px;
 }
 
 /* 차트 섹션 */
-#charts { display: flex; gap: 40px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; width: 100%; }
+#charts { 
+  display: flex; 
+  gap: 20px; 
+  justify-content: center; 
+  margin-bottom: 40px; 
+}
 #charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); text-align: center; }
-#charts h3 { margin-top: 0; font-size: 18px; color: #34495e; }
-#charts canvas { width: 320px; height: 320px; }
+#charts canvas { width: 320px !important; height: 320px !important; }
 
 /* 버튼 스타일 */
+.button-group { text-align: center; margin-top: 30px; }
 button {
-  display: inline-block; 
-  margin: 20px 10px; 
   padding: 14px 30px; 
   border: none;
   background: #3498db; 
@@ -129,16 +122,13 @@ button {
   font-size: 16px;
   cursor: pointer; 
   font-weight: 700; 
-  transition: all 0.3s;
-  box-shadow: 0 4px 15px rgba(52,152,219,0.2);
+  margin: 0 10px;
 }
-button:hover { background: #2980b9; transform: translateY(-2px); }
 
 @media print {
   body { padding: 0; background: white; }
   .container { width: 100%; max-width: none; padding: 0; }
   button, .no-print { display: none !important; }
-  table { box-shadow: none; border: 1px solid #eee; margin: 10px auto; }
 }
 </style>
 </head>
@@ -151,12 +141,12 @@ button:hover { background: #2980b9; transform: translateY(-2px); }
   <table>
     <tr><th colspan="4">내담자 인적사항</th></tr>
     <tr>
-      <td class="info-label">이름</td><td class="info-input-cell"><input type="text" id="disp-name"></td>
-      <td class="info-label">나이</td><td class="info-input-cell"><input type="text" id="disp-age"></td>
+      <td class="info-label">이름</td><td><input type="text" id="disp-name"></td>
+      <td class="info-label">나이</td><td><input type="text" id="disp-age"></td>
     </tr>
     <tr>
-      <td class="info-label">내담일</td><td class="info-input-cell"><input type="text" id="disp-date"></td>
-      <td class="info-label">전공</td><td class="info-input-cell"><input type="text" id="disp-major"></td>
+      <td class="info-label">내담일</td><td><input type="text" id="disp-date"></td>
+      <td class="info-label">전공</td><td><input type="text" id="disp-major"></td>
     </tr>
   </table>
 
@@ -168,8 +158,8 @@ button:hover { background: #2980b9; transform: translateY(-2px); }
   <table>
     <tr><th colspan="4">입시 평가결과</th></tr>
     <tr>
-      <td class="info-label">목표학교</td><td class="info-input-cell"><input type="text" id="target-school"></td>
-      <td class="info-label">평균 총점</td><td class="info-input-cell" style="font-weight: 800; color: #e74c3c; font-size: 1.2em;"><span id="avg"></span></td>
+      <td class="info-label">목표학교</td><td><input type="text" id="target-school"></td>
+      <td class="info-label">평균 총점</td><td style="font-weight: 800; color: #e74c3c; font-size: 1.2em;"><span id="avg"></span></td>
     </tr>
   </table>
 
@@ -198,7 +188,7 @@ button:hover { background: #2980b9; transform: translateY(-2px); }
     <tr><td><textarea id="comment-area" placeholder="입시 성공을 위한 최종 조언을 입력해주세요."></textarea></td></tr>
   </table>
 
-  <div class="no-print" style="text-align:center; width: 100%;">
+  <div class="button-group no-print">
     <button onclick="goBack()" style="background: #95a5a6;">새로 작성</button>
     <button onclick="saveToDB()">결과 저장하기</button>
     <button onclick="window.print()">리포트 출력하기</button>
@@ -227,18 +217,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
   const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
 
-  document.getElementById('disp-name').value = clientData.name;
-  document.getElementById('disp-age').value = clientData.age;
-  document.getElementById('disp-major').value = clientData.major;
-  document.getElementById('disp-date').value = clientData.date;
+  document.getElementById('disp-name').value = clientData.name || '';
+  document.getElementById('disp-age').value = clientData.age || '';
+  document.getElementById('disp-major').value = clientData.major || '';
+  document.getElementById('disp-date').value = clientData.date || '';
 
-  const recommendContent = document.getElementById('recommend-content');
-  const userMajor = clientData.major; 
-  if (artistData[userMajor]) {
-    const artists = artistData[userMajor].split(', ');
-    recommendContent.innerHTML = artists.map(name => `<span># ${name}</span>`).join('');
+  // 추천 아티스트 렌더링 (클래스 기반으로 안정화)
+  const recommendDiv = document.getElementById('recommend-content');
+  const major = clientData.major;
+  if (major && artistData[major]) {
+    const list = artistData[major].split(', ');
+    recommendDiv.innerHTML = list.map(name => `<span class="artist-tag"># ${name}</span>`).join('');
   } else {
-    recommendContent.innerHTML = "<span style='background:none; border:none; color:#95a5a6;'>전공 정보가 확인되지 않습니다.</span>";
+    recommendDiv.innerHTML = "<span style='color:#95a5a6;'>전공에 맞는 추천 리스트를 불러올 수 없습니다.</span>";
   }
 
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
@@ -254,34 +245,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
   });
 
-  const commonOptions = {
-    scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:12, weight:'600'}} } },
-    plugins:{ legend:{ display:false } }
-  };
   new Chart(document.getElementById('myChart'),{
     type:'radar',
-    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.2)", borderColor:"#3498db", borderWidth:3, pointBackgroundColor: "#3498db"}]},
-    options: commonOptions
+    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.2)", borderColor:"#3498db", borderWidth:3}]},
+    options: { scales:{ r:{ beginAtZero:true, max:100 } }, plugins:{ legend:{ display:false } } }
   });
   new Chart(document.getElementById('avgChart'),{
     type:'radar',
-    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash: [5, 5]}]},
-    options: commonOptions
+    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash:[5,5]}]},
+    options: { scales:{ r:{ beginAtZero:true, max:100 } }, plugins:{ legend:{ display:false } } }
   });
 
   window.goBack = () => window.location.href="index.html";
-
   window.saveToDB = async () => {
     const targetschool = document.getElementById('target-school').value;
-    const recommend = artistData[userMajor] || ""; 
     const improvement = document.getElementById('improvement-area').value;
     const comment = document.getElementById('comment-area').value;
+    const recommendStr = artistData[major] || "";
 
     const { error } = await supabaseClient.from('students').insert([{
       ...clientData, scores: savedData, avg: avgScore, targetschool,
-      recommend, improvement, comment
+      recommend: recommendStr, improvement, comment
     }]);
-
     if(error) alert("저장 실패 ❌"); else alert("저장 성공 ✅");
   };
 });
