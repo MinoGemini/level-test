@@ -63,7 +63,18 @@ input[type=text], textarea {
 
 textarea { 
   resize: vertical; 
-  height:100px; /* 추천 리스트가 많으므로 높이를 조금 늘림 */
+  height:100px; 
+}
+
+/* 추천 아티스트 출력용 div 스타일 */
+#recommend-content {
+  text-align: left;
+  padding: 10px 5px;
+  line-height: 1.6;
+  font-size: 15px;
+  white-space: pre-wrap; /* 줄바꿈 유지 */
+  word-break: break-all;
+  color: #2c3e50;
 }
 
 /* 그래프 */
@@ -87,20 +98,21 @@ button:hover { background:#2980b9; }
 
 /* A4 출력용 */
 @media print {
+  body { padding: 0; background: white; }
+  .container { width: 100%; max-width: none; padding: 0; }
+  
   table td textarea {
     display: block !important;
     width: 100% !important;
-    min-height: 100px;
+    min-height: 80px;
     text-align: left !important;
-    white-space: pre-wrap;
-    overflow-wrap: break-word;
     border: none;
     background: none;
     padding: 0;
-    font-size: 14px;
   }
-  button { display:none; }
-  .no-print { display: none; }
+  
+  button, .no-print { display:none !important; }
+  table { box-shadow: none; border: 1px solid #ccc; }
 }
 </style>
 </head>
@@ -111,7 +123,7 @@ button:hover { background:#2980b9; }
 <h1>경희실용음악 입시 리포트</h1>
 
 <table>
-  <tr><th colspan="2">내담자 인적사항</th></tr>
+  <tr><th colspan="4">내담자 인적사항</th></tr>
   <tr>
     <td>이름</td><td><input type="text" id="disp-name"></td>
     <td>나이</td><td><input type="text" id="disp-age"></td>
@@ -130,7 +142,7 @@ button:hover { background:#2980b9; }
 <table>
   <tr><th colspan="4">입시 평가결과</th></tr>
   <tr>
-    <td>목표학교</td><td><input type="text"></td>
+    <td>목표학교</td><td><input type="text" id="target-school"></td>
     <td>평균 점수</td><td><span id="avg"></span></td>
   </tr>
 </table>
@@ -143,17 +155,21 @@ button:hover { background:#2980b9; }
 
 <table>
   <tr><th>추천 입시곡 / 아티스트</th></tr>
-  <tr><td><textarea id="recommend-area"></textarea></td></tr>
+  <tr>
+    <td style="padding: 15px;">
+      <div id="recommend-content"></div>
+    </td>
+  </tr>
 </table>
 
 <table>
   <tr><th>장점 / 보완해야 할 점</th></tr>
-  <tr><td><textarea></textarea></td></tr>
+  <tr><td><textarea id="improvement-area"></textarea></td></tr>
 </table>
 
 <table>
   <tr><th>원장님 총평</th></tr>
-  <tr><td><textarea></textarea></td></tr>
+  <tr><td><textarea id="comment-area"></textarea></td></tr>
 </table>
 
 <div class="no-print" style="text-align:center;">
@@ -164,19 +180,19 @@ button:hover { background:#2980b9; }
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. 데이터 정의 (전공별 아티스트)
+  // 1. 전공별 아티스트 명단 데이터
   const artistData = {
-    '드럼': '데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
-    '베이스': '자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
-    '기타': '마크레티어리, 팻메쓰니, 노만브라운, 존메이어, 마이클랜도우, 스캇핸더슨, 척롭, 폴잭슨주니어, 적재',
-    '재즈피아노': '오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
-    '보컬': '데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 제이미컬럼, 찰리푸스, 저스틴비버, 저스틴팀버레이크, 김범수, 박효신, 나얼, 박정현, 이소라, 미노이, 성시경, 정승환, 김동률',
-    '작곡': '퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
-    '싱송': '선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
-    '미디': '아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로, 스티브아오키, 카이고, 마이크페리, 피독'
+    '드럼': '• 데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
+    '베이스': '• 자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
+    '기타': '• 마크레티어리, 팻메쓰니, 노만브라운, 존메이어, 마이클랜도우, 스캇핸더슨, 척롭, 폴잭슨주니어, 적재',
+    '재즈피아노': '• 오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
+    '보컬': '• 데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 제이미컬럼, 찰리푸스, 저스틴비버, 저스틴팀버레이크, 김범수, 박효신, 나얼, 박정현, 이소라, 미노이, 성시경, 정승환, 김동률',
+    '작곡': '• 퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
+    '싱송': '• 선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
+    '미디': '• 아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로, 스티브아오키, 카이고, 마이크페리, 피독'
   };
 
-  // 2. 초기화
+  // 2. 초기화 및 데이터 로드
   window.supabaseClient = supabase.createClient(
     "https://gnveewglucbnmuvjupst.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
@@ -186,20 +202,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
   const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
 
-  // 3. 인적사항 채우기
+  // 3. 인적사항 화면 표시
   document.getElementById('disp-name').value = clientData.name;
   document.getElementById('disp-age').value = clientData.age;
   document.getElementById('disp-major').value = clientData.major;
   document.getElementById('disp-date').value = clientData.date;
 
-  // 4. 전공별 아티스트 자동 입력
-  const recommendArea = document.getElementById('recommend-area');
-  const userMajor = clientData.major; // 예: "보컬"
+  // 4. [중요] 전공별 아티스트 텍스트 출력 (textarea 아님)
+  const recommendContent = document.getElementById('recommend-content');
+  const userMajor = clientData.major; 
   if (artistData[userMajor]) {
-    recommendArea.value = `[추천 아티스트]\n${artistData[userMajor]}`;
+    recommendContent.innerText = artistData[userMajor];
+  } else {
+    recommendContent.innerText = "전공을 확인해 주세요.";
   }
 
-  // 5. 점수 및 그래프 처리
+  // 5. 점수 및 그래프 계산
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
                     Number(savedData.e), Number(savedData.f), Number(savedData.g)];
   const avgData = [50,50,50,50,50,50,50];
@@ -213,8 +231,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
   });
 
+  // 차트 생성
   const commonOptions = {
-    scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:14, weight:'bold'}} } },
+    scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:13, weight:'bold'}} } },
     plugins:{ legend:{ display:false } }
   };
   new Chart(document.getElementById('myChart'),{
@@ -228,16 +247,31 @@ document.addEventListener("DOMContentLoaded", () => {
     options: commonOptions
   });
 
-  // 버튼 함수들
+  // 버튼 기능
   window.goBack = () => window.location.href="index.html";
+
   window.saveToDB = async () => {
-    const targetschool = document.querySelector('table:nth-of-type(2) input').value;
-    const textareas = document.querySelectorAll("textarea");
+    const targetschool = document.getElementById('target-school').value;
+    const recommend = document.getElementById('recommend-content').innerText;
+    const improvement = document.getElementById('improvement-area').value;
+    const comment = document.getElementById('comment-area').value;
+
     const { error } = await supabaseClient.from('students').insert([{
-      ...clientData, scores: savedData, avg: avgScore, targetschool,
-      recommend: textareas[0].value, improvement: textareas[1].value, comment: textareas[2].value
+      ...clientData, 
+      scores: savedData, 
+      avg: avgScore, 
+      targetschool,
+      recommend, 
+      improvement, 
+      comment
     }]);
-    if(error) alert("저장 실패 ❌"); else alert("저장 완료 ✅");
+
+    if(error) {
+      console.error(error);
+      alert("저장 실패 ❌");
+    } else {
+      alert("저장 완료 ✅");
+    }
   };
 });
 </script>
