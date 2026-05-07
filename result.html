@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+/* 기본 레이아웃 */
 .container { max-width: 1000px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
 body { font-family: 'Pretendard', sans-serif; background: #f4f7fa; margin: 0; padding: 30px; color: #2c3e50; }
 h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; }
@@ -28,36 +29,20 @@ th { background: #3498db; color: white; font-weight: 600; font-size: 15px; }
 
 .info-label { font-weight: bold; background: #fcfcfc; width: 150px; }
 
-input[type=text] { 
+input[type=text], textarea { 
   width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; 
-  border: 1px solid #dee2e6; font-size: 14px; text-align: center;
-}
-
-textarea { 
-  width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; 
-  border: 1px solid #dee2e6; font-size: 14px; resize: vertical; height: 120px;
+  border: 1px solid #dee2e6; font-size: 14px; 
 }
 
 /* 추천 아티스트 태그 디자인 */
-#recommend-content {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: flex-start;
-  min-height: 40px;
-}
-
+#recommend-content { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; min-height: 40px; }
 .artist-tag {
-  display: inline-block;
-  background: #ebf5ff;
-  color: #2980b9;
-  padding: 8px 16px;
-  border-radius: 50px;
-  font-size: 14px;
-  font-weight: 600;
-  border: 1px solid #d0e8ff;
+  display: inline-block; background: #ebf5ff; color: #2980b9; padding: 8px 16px;
+  border-radius: 50px; font-size: 14px; font-weight: 600; border: 1px solid #d0e8ff;
 }
 
+/* 차트 섹션 - 인쇄 시에도 유지되도록 no-print 제거 고려 가능하나, 
+   사용자 요청에 따라 차트 자체를 출력물에 포함하도록 CSS 수정 */
 #charts { display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; }
 #charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
 #charts canvas { width: 320px !important; height: 320px !important; }
@@ -65,10 +50,19 @@ textarea {
 .button-group { text-align: center; margin-top: 30px; }
 button { padding: 14px 30px; border: none; background: #3498db; color: white; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: 700; margin: 0 10px; }
 
+/* 🖨️ 인쇄 핵심 설정 */
 @media print {
-  body { padding: 0; background: white; }
+  body { padding: 0; background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .container { width: 100%; max-width: none; padding: 0; }
-  button, .no-print { display: none !important; }
+  .no-print { display: none !important; }
+  
+  /* 차트가 들어있는 영역을 출력물에 포함 */
+  #charts { display: flex !important; page-break-inside: avoid; }
+  #charts div { box-shadow: none; border: 1px solid #eee; }
+  
+  table { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
+  th { background-color: #3498db !important; color: white !important; }
+  .artist-tag { background-color: #ebf5ff !important; border: 1px solid #d0e8ff !important; }
 }
 </style>
 </head>
@@ -89,7 +83,7 @@ button { padding: 14px 30px; border: none; background: #3498db; color: white; bo
     </tr>
   </table>
 
-  <div id="charts" class="no-print">
+  <div id="charts">
     <div><h3>내 점수 분석</h3><canvas id="myChart"></canvas></div>
     <div><h3>평균 기준 점수</h3><canvas id="avgChart"></canvas></div>
   </div>
@@ -147,11 +141,6 @@ document.addEventListener("DOMContentLoaded", () => {
     '미디': '아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로'
   };
 
-  window.supabaseClient = supabase.createClient(
-    "https://gnveewglucbnmuvjupst.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
-  );
-
   const labels = ['초견능력','리듬감','음정감','테크닉','나이','장르의 이해','터치 및 톤'];
   const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
   const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
@@ -161,19 +150,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('disp-major').value = clientData.major || '';
   document.getElementById('disp-date').value = clientData.date || '';
 
-  const recommendDiv = document.getElementById('recommend-content');
   const major = clientData.major;
+  const recommendDiv = document.getElementById('recommend-content');
   if (major && artistData[major]) {
-    const list = artistData[major].split(', ');
-    recommendDiv.innerHTML = list.map(name => `<span class="artist-tag"># ${name}</span>`).join('');
-  } else {
-    recommendDiv.innerHTML = "<span style='color:#95a5a6;'>전공 정보가 없거나 추천 리스트를 불러올 수 없습니다.</span>";
+    recommendDiv.innerHTML = artistData[major].split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
   }
 
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
                     Number(savedData.e), Number(savedData.f), Number(savedData.g)];
-  const avgScore = (userData.reduce((a,b)=>a+Number(b),0)/userData.length).toFixed(1);
-  document.getElementById("avg").innerText = avgScore;
+  document.getElementById("avg").innerText = (userData.reduce((a,b)=>a+b,0)/userData.length).toFixed(1);
 
   const headerRow = document.getElementById("score-header");
   const scoreRow = document.getElementById("score-row");
@@ -182,30 +167,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
   });
 
-  new Chart(document.getElementById('myChart'),{
-    type:'radar',
-    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.2)", borderColor:"#3498db", borderWidth:3}]},
-    options: { scales:{ r:{ beginAtZero:true, max:100 } }, plugins:{ legend:{ display:false } } }
+  // 차트 생성 옵션 (애니메이션 제거가 핵심)
+  const chartOptions = {
+    animation: false, // 인쇄 시 캔버스 캡처를 위해 애니메이션 끔
+    responsive: false,
+    maintainAspectRatio: true,
+    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } },
+    plugins: { legend: { display: false } }
+  };
+
+  new Chart(document.getElementById('myChart'), {
+    type: 'radar',
+    data: { labels, datasets: [{ data: userData, backgroundColor: "rgba(52,152,219,0.2)", borderColor: "#3498db", borderWidth: 2 }] },
+    options: chartOptions
   });
-  new Chart(document.getElementById('avgChart'),{
-    type:'radar',
-    data:{ labels, datasets:[{ data:[50,50,50,50,50,50,50], backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash:[5,5]}]},
-    options: { scales:{ r:{ beginAtZero:true, max:100 } }, plugins:{ legend:{ display:false } } }
+
+  new Chart(document.getElementById('avgChart'), {
+    type: 'radar',
+    data: { labels, datasets: [{ data: [50,50,50,50,50,50,50], backgroundColor: "rgba(149,165,166,0.1)", borderColor: "#95a5a6", borderWidth: 1, borderDash:[5,5] }] },
+    options: chartOptions
   });
 
   window.goBack = () => window.location.href="index.html";
-  window.saveToDB = async () => {
-    const targetschool = document.getElementById('target-school').value;
-    const improvement = document.getElementById('improvement-area').value;
-    const comment = document.getElementById('comment-area').value;
-    const recommendStr = artistData[major] || "";
-
-    const { error } = await supabaseClient.from('students').insert([{
-      ...clientData, scores: savedData, avg: avgScore, targetschool,
-      recommend: recommendStr, improvement, comment
-    }]);
-    if(error) alert("저장 실패 ❌"); else alert("저장 성공 ✅");
-  };
 });
 </script>
 </body>
