@@ -8,25 +8,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* 1. 레이아웃 중앙 정렬 - flex 제거하고 기본 block 정렬 사용 */
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
+.container { max-width: 1000px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
+body { font-family: 'Pretendard', sans-serif; background: #f4f7fa; margin: 0; padding: 30px; color: #2c3e50; }
+h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; }
 
-body {
-  font-family: 'Pretendard', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f7fa;
-  margin: 0;
-  padding: 30px;
-  color: #2c3e50;
-}
-
-h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; letter-spacing: -1px; }
-
-/* 2. 테이블 강제 중앙 정렬 및 너비 고정 */
 table {
   width: 100% !important;
   border-collapse: collapse; 
@@ -38,54 +23,27 @@ table {
   table-layout: fixed;
 }
 
-th, td { 
-  padding: 15px; 
-  text-align: center; 
-  vertical-align: middle;
-  border-bottom: 1px solid #f0f0f0; 
-}
+th, td { padding: 15px; text-align: center; vertical-align: middle; border-bottom: 1px solid #f0f0f0; }
+th { background: #3498db; color: white; font-weight: 600; font-size: 15px; }
 
-th { 
-  background: #3498db; 
-  color: white; 
-  font-weight: 600; 
-  font-size: 15px; 
-}
+.info-label { font-weight: bold; background: #fcfcfc; width: 150px; }
 
-/* 인적사항 셀 너비 비율 고정 */
-.info-label {
-  font-weight: bold; 
-  background: #fcfcfc; 
-  width: 150px; /* 고정 너비 부여 */
-}
-
-/* 입력 필드 스타일 */
 input[type=text] { 
-  width: 100%;
-  box-sizing: border-box;
-  padding: 10px; 
-  border-radius: 8px; 
-  border: 1px solid #dee2e6; 
-  font-size: 14px; 
-  text-align: center;
+  width: 100%; box-sizing: border-box; padding: 10px; border-radius: 8px; 
+  border: 1px solid #dee2e6; font-size: 14px; text-align: center;
 }
 
 textarea { 
-  width: 100%;
-  box-sizing: border-box;
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #dee2e6;
-  font-size: 14px;
-  resize: vertical; 
-  height: 120px;
+  width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; 
+  border: 1px solid #dee2e6; font-size: 14px; resize: vertical; height: 120px;
 }
 
-/* 3. 추천 아티스트 영역 (사라짐 방지) */
+/* 추천 아티스트 태그 디자인 */
 #recommend-content {
-  text-align: left;
-  padding: 5px;
-  display: block; /* flex에서 block으로 변경하여 가독성 확보 */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-start;
   min-height: 40px;
 }
 
@@ -93,37 +51,19 @@ textarea {
   display: inline-block;
   background: #ebf5ff;
   color: #2980b9;
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-size: 14px;
   font-weight: 600;
   border: 1px solid #d0e8ff;
-  margin: 4px;
 }
 
-/* 차트 섹션 */
-#charts { 
-  display: flex; 
-  gap: 20px; 
-  justify-content: center; 
-  margin-bottom: 40px; 
-}
-#charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); text-align: center; }
+#charts { display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; }
+#charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
 #charts canvas { width: 320px !important; height: 320px !important; }
 
-/* 버튼 스타일 */
 .button-group { text-align: center; margin-top: 30px; }
-button {
-  padding: 14px 30px; 
-  border: none;
-  background: #3498db; 
-  color: white; 
-  border-radius: 12px; 
-  font-size: 16px;
-  cursor: pointer; 
-  font-weight: 700; 
-  margin: 0 10px;
-}
+button { padding: 14px 30px; border: none; background: #3498db; color: white; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: 700; margin: 0 10px; }
 
 @media print {
   body { padding: 0; background: white; }
@@ -134,7 +74,6 @@ button {
 </head>
 
 <body>
-
 <div class="container">
   <h1>경희실용음악 입시 리포트</h1>
 
@@ -172,7 +111,7 @@ button {
   <table>
     <tr><th>추천 입시곡 및 아티스트 가이드</th></tr>
     <tr>
-      <td style="padding: 20px; background: #fafafa;">
+      <td style="padding: 25px; background: #fafafa; text-align: left;">
         <div id="recommend-content"></div>
       </td>
     </tr>
@@ -222,19 +161,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('disp-major').value = clientData.major || '';
   document.getElementById('disp-date').value = clientData.date || '';
 
-  // 추천 아티스트 렌더링 (클래스 기반으로 안정화)
   const recommendDiv = document.getElementById('recommend-content');
   const major = clientData.major;
   if (major && artistData[major]) {
     const list = artistData[major].split(', ');
     recommendDiv.innerHTML = list.map(name => `<span class="artist-tag"># ${name}</span>`).join('');
   } else {
-    recommendDiv.innerHTML = "<span style='color:#95a5a6;'>전공에 맞는 추천 리스트를 불러올 수 없습니다.</span>";
+    recommendDiv.innerHTML = "<span style='color:#95a5a6;'>전공 정보가 없거나 추천 리스트를 불러올 수 없습니다.</span>";
   }
 
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
                     Number(savedData.e), Number(savedData.f), Number(savedData.g)];
-  const avgData = [50,50,50,50,50,50,50];
   const avgScore = (userData.reduce((a,b)=>a+Number(b),0)/userData.length).toFixed(1);
   document.getElementById("avg").innerText = avgScore;
 
@@ -252,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   new Chart(document.getElementById('avgChart'),{
     type:'radar',
-    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash:[5,5]}]},
+    data:{ labels, datasets:[{ data:[50,50,50,50,50,50,50], backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash:[5,5]}]},
     options: { scales:{ r:{ beginAtZero:true, max:100 } }, plugins:{ legend:{ display:false } } }
   });
 
