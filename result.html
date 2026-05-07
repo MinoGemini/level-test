@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* 전체 UI 컨테이너 */
+/* 전체 UI 스타일링 */
 .container {
   max-width: 1000px;
   margin: 0 auto;
@@ -17,99 +17,116 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #eef2f7;
+  font-family: 'Pretendard', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
   margin: 0;
   padding: 30px;
-  color: #333;
+  color: #2c3e50;
 }
 
-h1 { text-align:center; margin-bottom:30px; font-weight:bold; color:#2c3e50; }
+h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; letter-spacing: -1px; }
 
 table {
   width:100%; 
   border-collapse:collapse; 
-  margin-bottom:20px;
+  margin-bottom:25px;
   background:white; 
-  border-radius:12px; 
+  border-radius:16px; 
   overflow:hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
   page-break-inside: avoid;
   table-layout: fixed;
 }
 
-/* 모든 제목(th)과 셀(td)을 기본적으로 가운데 정렬 */
 th, td { 
-  padding:12px; 
-  text-align:center; /* ✅ 텍스트 가운데 정렬 */
+  padding:15px; 
+  text-align:center; 
   vertical-align: middle;
-  border-bottom:1px solid #eee; 
+  border-bottom:1px solid #f0f0f0; 
 }
 
 th { 
   background:#3498db; 
   color:white; 
-  font-weight:bold; 
+  font-weight:600; 
   font-size:15px; 
 }
 
-/* 입력창 내부 글씨도 가운데 정렬 */
+/* 입력 필드 스타일 */
 input[type=text] { 
   width: 100%;
   box-sizing: border-box;
-  padding:8px; 
-  border-radius:6px; 
-  border:1px solid #ccc; 
+  padding:10px; 
+  border-radius:8px; 
+  border:1px solid #dee2e6; 
   font-size:14px; 
-  text-align: center; /* ✅ 입력값 가운데 정렬 */
-  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  text-align: center;
+  transition: all 0.3s;
 }
+input[type=text]:focus { border-color: #3498db; outline: none; box-shadow: 0 0 0 3px rgba(52,152,219,0.1); }
 
 textarea { 
   width: 100%;
   box-sizing: border-box;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
   font-size: 14px;
   resize: vertical; 
-  height:100px; 
+  height:120px;
+  line-height: 1.5;
 }
 
-/* 추천 아티스트 출력용 (이 부분만 왼쪽 정렬 유지하여 가독성 확보) */
+/* 추천 아티스트 트렌디 스타일 */
 #recommend-content {
   text-align: left;
-  padding: 10px 5px;
-  line-height: 1.6;
-  font-size: 15px;
-  white-space: pre-wrap; 
-  word-break: break-all;
-  color: #2c3e50;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
 }
 
-/* 그래프 */
-#charts { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin-bottom:30px; }
-#charts canvas { width:320px; height:320px; border-radius:15px; background:white; padding:10px; box-shadow:0 6px 15px rgba(0,0,0,0.05); }
+#recommend-content span {
+  background: #ebf5ff;
+  color: #2980b9;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid #d0e8ff;
+  transition: transform 0.2s;
+}
 
+/* 차트 섹션 */
+#charts { display:flex; gap:40px; flex-wrap:wrap; justify-content:center; margin-bottom:40px; }
+#charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); text-align: center; }
+#charts h3 { margin-top: 0; font-size: 18px; color: #34495e; }
+#charts canvas { width:320px; height:320px; }
+
+/* 버튼 스타일 */
 button {
   display:inline-block; 
   margin:20px 10px; 
-  padding:12px 25px; 
+  padding:14px 30px; 
   border:none;
   background:#3498db; 
   color:white; 
-  border-radius:10px; 
+  border-radius:12px; 
   font-size:16px;
   cursor:pointer; 
-  font-weight:bold; 
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+  font-weight:700; 
+  transition: all 0.3s;
+  box-shadow:0 4px 15px rgba(52,152,219,0.2);
 }
-button:hover { background:#2980b9; }
+button:hover { background:#2980b9; transform: translateY(-2px); }
 
 @media print {
   body { padding: 0; background: white; }
   .container { width: 100%; max-width: none; padding: 0; }
   button, .no-print { display:none !important; }
+  table { box-shadow: none; border: 1px solid #eee; }
+  #recommend-content span { border: 1px solid #ccc; background: #fff !important; color: #000; }
 }
 </style>
 </head>
@@ -122,70 +139,70 @@ button:hover { background:#2980b9; }
 <table>
   <tr><th colspan="4">내담자 인적사항</th></tr>
   <tr>
-    <td style="font-weight: bold; background: #fafafa;">이름</td><td><input type="text" id="disp-name"></td>
-    <td style="font-weight: bold; background: #fafafa;">나이</td><td><input type="text" id="disp-age"></td>
+    <td style="font-weight: bold; background: #fcfcfc; width: 15%;">이름</td><td style="width: 35%;"><input type="text" id="disp-name"></td>
+    <td style="font-weight: bold; background: #fcfcfc; width: 15%;">나이</td><td style="width: 35%;"><input type="text" id="disp-age"></td>
   </tr>
   <tr>
-    <td style="font-weight: bold; background: #fafafa;">내담일</td><td><input type="text" id="disp-date"></td>
-    <td style="font-weight: bold; background: #fafafa;">전공</td><td><input type="text" id="disp-major"></td>
+    <td style="font-weight: bold; background: #fcfcfc;">내담일</td><td><input type="text" id="disp-date"></td>
+    <td style="font-weight: bold; background: #fcfcfc;">전공</td><td><input type="text" id="disp-major"></td>
   </tr>
 </table>
 
 <div id="charts">
-  <div><h3>내 점수</h3><canvas id="myChart"></canvas></div>
-  <div><h3>평균 기준</h3><canvas id="avgChart"></canvas></div>
+  <div><h3>내 점수 분석</h3><canvas id="myChart"></canvas></div>
+  <div><h3>평균 기준 점수</h3><canvas id="avgChart"></canvas></div>
 </div>
 
 <table>
   <tr><th colspan="4">입시 평가결과</th></tr>
   <tr>
-    <td style="font-weight: bold; background: #fafafa;">목표학교</td><td><input type="text" id="target-school"></td>
-    <td style="font-weight: bold; background: #fafafa;">평균 점수</td><td style="font-weight: bold; color: #e74c3c;"><span id="avg"></span></td>
+    <td style="font-weight: bold; background: #fcfcfc;">목표학교</td><td><input type="text" id="target-school"></td>
+    <td style="font-weight: bold; background: #fcfcfc;">평균 총점</td><td style="font-weight: 800; color: #e74c3c; font-size: 1.2em;"><span id="avg"></span></td>
   </tr>
 </table>
 
 <table>
-  <tr><th colspan="7">각 항목별 점수</th></tr>
-  <tr id="score-header" style="background: #fafafa;"></tr>
-  <tr id="score-row" style="font-weight: bold;"></tr>
+  <tr><th colspan="7">상세 항목 평가</th></tr>
+  <tr id="score-header" style="background: #fcfcfc; font-size: 13px;"></tr>
+  <tr id="score-row" style="font-weight: bold; font-size: 16px; color: #2980b9;"></tr>
 </table>
 
 <table>
-  <tr><th>추천 입시곡 / 아티스트</th></tr>
+  <tr><th>추천 입시곡 및 아티스트 가이드</th></tr>
   <tr>
-    <td style="padding: 15px;">
+    <td style="padding: 20px; background: #fafafa;">
       <div id="recommend-content"></div>
     </td>
   </tr>
 </table>
 
 <table>
-  <tr><th>장점 / 보완해야 할 점</th></tr>
-  <tr><td><textarea id="improvement-area"></textarea></td></tr>
+  <tr><th>장점 및 보완점</th></tr>
+  <tr><td><textarea id="improvement-area" placeholder="학생의 강점과 구체적인 연습 방향을 적어주세요."></textarea></td></tr>
 </table>
 
 <table>
   <tr><th>원장님 총평</th></tr>
-  <tr><td><textarea id="comment-area"></textarea></td></tr>
+  <tr><td><textarea id="comment-area" placeholder="입시 성공을 위한 최종 조언을 입력해주세요."></textarea></td></tr>
 </table>
 
 <div class="no-print" style="text-align:center;">
-  <button onclick="goBack()">새로 작성</button>
-  <button onclick="saveToDB()">저장하기</button>
-  <button onclick="window.print()">출력하기</button>
+  <button onclick="goBack()" style="background: #95a5a6;">새로 작성</button>
+  <button onclick="saveToDB()">결과 저장하기</button>
+  <button onclick="window.print()">리포트 출력하기</button>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const artistData = {
-    '드럼': '• 데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
-    '베이스': '• 자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
-    '기타': '• 마크레티어리, 팻메쓰니, 노만브라운, 존메이어, 마이클랜도우, 스캇핸더슨, 척롭, 폴잭슨주니어, 적재',
-    '재즈피아노': '• 오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
-    '보컬': '• 데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 제이미컬럼, 찰리푸스, 저스틴비버, 저스틴팀버레이크, 김범수, 박효신, 나얼, 박정현, 이소라, 미노이, 성시경, 정승환, 김동률',
-    '작곡': '• 퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
-    '싱송': '• 선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
-    '미디': '• 아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로, 스티브아오키, 카이고, 마이크페리, 피독'
+    '드럼': '데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
+    '베이스': '자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
+    '기타': '마크레티어리, 팻메쓰니, 노만브라운, 존메이어, 마이클랜도우, 스캇핸더슨, 척롭, 폴잭슨주니어, 적재',
+    '재즈피아노': '오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
+    '보컬': '데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 김범수, 박효신, 나얼, 박정현, 이소라, 성시경',
+    '작곡': '퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
+    '싱송': '선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
+    '미디': '아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로'
   };
 
   window.supabaseClient = supabase.createClient(
@@ -202,10 +219,14 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('disp-major').value = clientData.major;
   document.getElementById('disp-date').value = clientData.date;
 
+  // 아티스트 명단을 태그 형태로 변환하여 출력하는 로직
   const recommendContent = document.getElementById('recommend-content');
   const userMajor = clientData.major; 
   if (artistData[userMajor]) {
-    recommendContent.innerText = artistData[userMajor];
+    const artists = artistData[userMajor].split(', ');
+    recommendContent.innerHTML = artists.map(name => `<span># ${name}</span>`).join('');
+  } else {
+    recommendContent.innerHTML = "<span style='background:none; border:none; color:#95a5a6;'>전공 정보가 확인되지 않습니다.</span>";
   }
 
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
@@ -222,17 +243,17 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const commonOptions = {
-    scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:13, weight:'bold'}} } },
+    scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:12, weight:'600'}} } },
     plugins:{ legend:{ display:false } }
   };
   new Chart(document.getElementById('myChart'),{
     type:'radar',
-    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.3)", borderColor:"#2980b9", borderWidth:2}]},
+    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.2)", borderColor:"#3498db", borderWidth:3, pointBackgroundColor: "#3498db"}]},
     options: commonOptions
   });
   new Chart(document.getElementById('avgChart'),{
     type:'radar',
-    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(200,200,200,0.3)", borderColor:"#7f8c8d", borderWidth:2}]},
+    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(149,165,166,0.1)", borderColor:"#95a5a6", borderWidth:2, borderDash: [5, 5]}]},
     options: commonOptions
   });
 
@@ -240,7 +261,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   window.saveToDB = async () => {
     const targetschool = document.getElementById('target-school').value;
-    const recommend = document.getElementById('recommend-content').innerText;
+    const recommend = artistData[userMajor] || ""; 
     const improvement = document.getElementById('improvement-area').value;
     const comment = document.getElementById('comment-area').value;
 
@@ -249,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
       recommend, improvement, comment
     }]);
 
-    if(error) alert("저장 실패 ❌"); else alert("저장 완료 ✅");
+    if(error) alert("저장 실패 ❌"); else alert("저장 성공 ✅");
   };
 });
 </script>
