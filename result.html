@@ -8,236 +8,328 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-/* 기본 레이아웃 */
-.container { max-width: 1000px; margin: 0 auto; padding: 20px; box-sizing: border-box; }
-body { font-family: 'Pretendard', sans-serif; background: #f4f7fa; margin: 0; padding: 30px; color: #2c3e50; }
-h1 { text-align:center; margin-bottom:40px; font-weight:800; color:#1a2a3a; }
+/* 고급스러운 폰트 세팅 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
+:root {
+    --primary-color: #2c3e50;
+    --accent-color: #3498db;
+    --bg-light: #f8fabb;
+}
+
+body { 
+    font-family: 'Pretendard', sans-serif; 
+    background: #f4f7fa; 
+    margin: 0; 
+    padding: 0; 
+    color: var(--primary-color); 
+    line-height: 1.6;
+}
+
+.container { 
+    max-width: 900px; 
+    margin: 40px auto; 
+    padding: 60px; 
+    background: white; 
+    box-sizing: border-box; 
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    border-radius: 8px;
+}
+
+/* 상단 헤더 디자인 */
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 15px;
+    margin-bottom: 40px;
+}
+
+.report-header h1 { 
+    margin: 0; 
+    font-size: 32px; 
+    font-weight: 900; 
+    letter-spacing: -1px;
+}
+
+.report-header .sub-title {
+    font-size: 14px;
+    color: #7f8c8d;
+    font-weight: 600;
+}
+
+/* 테이블 공통 디자인 */
 table {
-  width: 100% !important;
-  border-collapse: collapse; 
-  margin: 0 auto 25px auto; 
-  background: white; 
-  border-radius: 16px; 
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
-  table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse; 
+    margin-bottom: 30px; 
+    table-layout: fixed;
 }
 
-th, td { padding: 15px; text-align: center; vertical-align: middle; border-bottom: 1px solid #f0f0f0; }
-th { background: #3498db; color: white; font-weight: 600; font-size: 15px; }
+th { 
+    background: #f1f4f7; 
+    color: #34495e; 
+    font-weight: 700; 
+    font-size: 14px; 
+    padding: 12px;
+    border: 1px solid #dcdde1;
+}
 
-.info-label { font-weight: bold; background: #fcfcfc; width: 150px; }
+td { 
+    padding: 15px; 
+    text-align: center; 
+    border: 1px solid #dcdde1;
+    font-size: 15px;
+}
 
-/* 인적사항 입력 필드 스타일 (텍스트처럼 보이게 수정) */
+.info-label { background: #f9f9f9; font-weight: 700; width: 120px; color: #2c3e50; }
+
+/* 입력창 스타일 */
 .info-input {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 8px;
-  border: none;
-  background: transparent;
-  font-size: 15px;
-  text-align: center;
-  color: #2c3e50;
-  font-family: inherit;
-  outline: none;
+    width: 100%;
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    text-align: center;
+    font-weight: 500;
+    outline: none;
 }
-.info-input:hover { background: rgba(52, 152, 219, 0.05); border-radius: 4px; }
 
-/* 텍스트 영역 스타일 */
 textarea { 
-  width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; 
-  border: 1px solid #dee2e6; font-size: 14px; resize: vertical; height: 120px;
-}
-
-/* 목표학교 입력 필드 (기존 스타일 유지) */
-#target-school {
-  width: 90%; padding: 8px; border-radius: 6px; border: 1px solid #dee2e6; text-align: center;
-}
-
-/* 추천 아티스트 태그 디자인 */
-#recommend-content { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-start; min-height: 40px; }
-.artist-tag {
-  display: inline-block; background: #ebf5ff; color: #2980b9; padding: 8px 16px;
-  border-radius: 50px; font-size: 14px; font-weight: 600; border: 1px solid #d0e8ff;
+    width: 100%; 
+    box-sizing: border-box; 
+    padding: 15px; 
+    border: 1px solid #dcdde1; 
+    font-size: 14px; 
+    resize: none; 
+    height: 110px;
+    line-height: 1.6;
+    background: #fcfcfc;
 }
 
 /* 차트 섹션 */
-#charts { display: flex; gap: 20px; justify-content: center; margin-bottom: 40px; }
-#charts div { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.03); }
-#charts canvas { width: 320px !important; height: 320px !important; }
+#charts { 
+    display: flex; 
+    gap: 30px; 
+    justify-content: center; 
+    margin: 40px 0; 
+}
+.chart-box {
+    text-align: center;
+    flex: 1;
+}
+.chart-box h3 { font-size: 16px; margin-bottom: 15px; color: #576574; }
+canvas { max-width: 300px !important; max-height: 300px !important; margin: 0 auto; }
 
-.button-group { text-align: center; margin-top: 30px; }
-button { padding: 14px 30px; border: none; background: #3498db; color: white; border-radius: 12px; font-size: 16px; cursor: pointer; font-weight: 700; margin: 0 10px; }
+/* 태그 디자인 */
+.artist-tag {
+    display: inline-block; 
+    background: #f1f2f6; 
+    color: #2f3542; 
+    padding: 6px 14px;
+    border-radius: 4px; 
+    font-size: 13px; 
+    font-weight: 600; 
+    margin: 3px;
+    border: 1px solid #dfe4ea;
+}
 
-/* 🖨️ 인쇄 설정 */
+/* 버튼 그룹 */
+.button-group { text-align: center; margin-top: 50px; }
+button { 
+    padding: 15px 35px; 
+    border: none; 
+    background: #2c3e50; 
+    color: white; 
+    border-radius: 6px; 
+    font-size: 15px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    transition: 0.3s;
+}
+button:hover { background: #34495e; }
+
+/* 🖨️ 인쇄 시 시각적 보정 */
 @media print {
-  body { padding: 0; background: white; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .container { width: 100%; max-width: none; padding: 0; }
-  .no-print { display: none !important; }
-  #charts { display: flex !important; page-break-inside: avoid; }
-  #charts div { box-shadow: none; border: 1px solid #eee; }
-  table { box-shadow: none; border: 1px solid #eee; page-break-inside: avoid; }
-  th { background-color: #3498db !important; color: white !important; }
-  .artist-tag { background-color: #ebf5ff !important; border: 1px solid #d0e8ff !important; }
-  .info-input { border: none !important; }
+    @page { size: A4; margin: 0; }
+    body { background: white; }
+    .container { 
+        width: 100%; 
+        max-width: none; 
+        box-shadow: none; 
+        margin: 0; 
+        padding: 50px; /* 인쇄 시 여백 */
+    }
+    .no-print { display: none !important; }
+    button { display: none !important; }
+    
+    th { background: #f1f4f7 !important; -webkit-print-color-adjust: exact; }
+    .artist-tag { background: #f1f2f6 !important; border: 1px solid #dfe4ea !important; -webkit-print-color-adjust: exact; }
+    
+    /* 인쇄 시 텍스트 영역 테두리 제거 혹은 흐리게 */
+    textarea { border: 1px solid #eee; background: white; }
 }
 </style>
 </head>
 
 <body>
 <div class="container">
-  <h1>경희실용음악 입시 리포트</h1>
+    <div class="report-header">
+        <div>
+            <div class="sub-title">KYUNGHEE MUSIC ACADEMY</div>
+            <h1>입시 분석 리포트</h1>
+        </div>
+        <div style="text-align: right; font-size: 14px; color: #7f8c8d;">
+            Evaluation Report
+        </div>
+    </div>
 
-  <table>
-    <tr><th colspan="4">내담자 인적사항</th></tr>
-    <tr>
-      <td class="info-label">이름</td><td><input type="text" id="disp-name" class="info-input"></td>
-      <td class="info-label">나이</td><td><input type="text" id="disp-age" class="info-input"></td>
-    </tr>
-    <tr>
-      <td class="info-label">내담일</td><td><input type="text" id="disp-date" class="info-input"></td>
-      <td class="info-label">전공</td><td><input type="text" id="disp-major" class="info-input"></td>
-    </tr>
-  </table>
+    <table>
+        <tr>
+            <td class="info-label">성 명</td><td><input type="text" id="disp-name" class="info-input"></td>
+            <td class="info-label">전 공</td><td><input type="text" id="disp-major" class="info-input"></td>
+        </tr>
+        <tr>
+            <td class="info-label">연 령</td><td><input type="text" id="disp-age" class="info-input"></td>
+            <td class="info-label">분석일시</td><td><input type="text" id="disp-date" class="info-input"></td>
+        </tr>
+    </table>
 
-  <div id="charts">
-    <div><h3>내 점수 분석</h3><canvas id="myChart"></canvas></div>
-    <div><h3>평균 기준 점수</h3><canvas id="avgChart"></canvas></div>
-  </div>
+    <div id="charts">
+        <div class="chart-box">
+            <h3>[ 능력치 분석 데이터 ]</h3>
+            <canvas id="myChart"></canvas>
+        </div>
+        <div class="chart-box">
+            <h3>[ 합격생 평균 데이터 ]</h3>
+            <canvas id="avgChart"></canvas>
+        </div>
+    </div>
 
-  <table>
-    <tr><th colspan="4">입시 평가결과</th></tr>
-    <tr>
-      <td class="info-label">목표학교</td><td><input type="text" id="target-school" placeholder="목표 학교 입력"></td>
-      <td class="info-label">평균 총점</td><td style="font-weight: 800; color: #e74c3c; font-size: 1.2em;"><span id="avg"></span></td>
-    </tr>
-  </table>
+    <table>
+        <tr>
+            <th colspan="4" style="background: var(--primary-color); color: white;">종합 평가 지표</th>
+        </tr>
+        <tr>
+            <td class="info-label">목표 학교</td>
+            <td><input type="text" id="target-school" class="info-input" placeholder="학교명을 입력하세요"></td>
+            <td class="info-label">평가 총점</td>
+            <td style="font-weight: 800; color: #e74c3c; font-size: 1.4em;"><span id="avg"></span></td>
+        </tr>
+    </table>
 
-  <table>
-    <tr><th colspan="7">상세 항목 평가</th></tr>
-    <tr id="score-header" style="background: #fcfcfc; font-size: 13px;"></tr>
-    <tr id="score-row" style="font-weight: bold; font-size: 16px; color: #2980b9;"></tr>
-  </table>
+    <table>
+        <tr id="score-header"></tr>
+        <tr id="score-row" style="font-weight: 700; font-size: 17px; color: var(--accent-color);"></tr>
+    </table>
 
-  <table>
-    <tr><th>추천 입시곡 및 아티스트 가이드</th></tr>
-    <tr>
-      <td style="padding: 25px; background: #fafafa; text-align: left;">
-        <div id="recommend-content"></div>
-      </td>
-    </tr>
-  </table>
+    <table>
+        <tr><th style="text-align: left; padding-left: 20px;">추천 입시곡 및 아티스트 가이드</th></tr>
+        <tr>
+            <td style="padding: 20px; text-align: left; background: #fafafa;">
+                <div id="recommend-content"></div>
+            </td>
+        </tr>
+    </table>
 
-  <table>
-    <tr><th>장점 및 보완점</th></tr>
-    <tr><td><textarea id="improvement-area" placeholder="학생의 강점과 구체적인 연습 방향을 적어주세요."></textarea></td></tr>
-  </table>
+    <table style="margin-bottom: 15px;">
+        <tr><th style="text-align: left; padding-left: 20px;">장점 및 보완점</th></tr>
+        <tr><td><textarea id="improvement-area" placeholder="내용을 입력하세요..."></textarea></td></tr>
+    </table>
 
-  <table>
-    <tr><th>원장님 총평</th></tr>
-    <tr><td><textarea id="comment-area" placeholder="입시 성공을 위한 최종 조언을 입력해주세요."></textarea></td></tr>
-  </table>
+    <table>
+        <tr><th style="text-align: left; padding-left: 20px;">원장님 총평</th></tr>
+        <tr><td><textarea id="comment-area" placeholder="내용을 입력하세요..."></textarea></td></tr>
+    </table>
 
-  <div class="button-group no-print">
-    <button onclick="goBack()" style="background: #95a5a6;">새로 작성</button>
-    <button onclick="saveToDB()">결과 저장하기</button>
-    <button onclick="window.print()">리포트 출력하기</button>
-  </div>
+    <div style="text-align: center; margin-top: 30px; font-weight: 700; font-size: 18px;">
+        경희실용음악학원
+    </div>
+
+    <div class="button-group no-print">
+        <button onclick="goBack()" style="background: #95a5a6; margin-right: 10px;">다시 작성</button>
+        <button onclick="saveToDB()" style="margin-right: 10px;">데이터 저장</button>
+        <button onclick="window.print()" style="background: var(--accent-color);">리포트 출력</button>
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  const artistData = {
-    '드럼': '데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
-    '베이스': '자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
-    '기타': 'Mark Lettieri, Pat Metheny, Norman Brown, John Mayer, Michael Landau, Scott Henderson, Chuck Loeb, Paul Jackson Jr., 적재',
-    '재즈피아노': '오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
-    '보컬': '데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 김범수, 박효신, 나얼, 박정현, 이소라, 성시경',
-    '작곡': '퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
-    '싱송': '선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
-    '미디': '아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로'
-  };
-
-  // Supabase 설정
-  window.supabaseClient = supabase.createClient(
-    "https://gnveewglucbnmuvjupst.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
-  );
-
-  const labels = ['초견능력','리듬감','음정감','테크닉','나이','장르의 이해','터치 및 톤'];
-  const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
-  const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
-
-  // 인적사항 데이터 삽입
-  document.getElementById('disp-name').value = clientData.name || '';
-  document.getElementById('disp-age').value = clientData.age || '';
-  document.getElementById('disp-major').value = clientData.major || '';
-  document.getElementById('disp-date').value = clientData.date || '';
-
-  const major = clientData.major;
-  const recommendDiv = document.getElementById('recommend-content');
-  if (major && artistData[major]) {
-    recommendDiv.innerHTML = artistData[major].split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
-  }
-
-  const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
-                    Number(savedData.e), Number(savedData.f), Number(savedData.g)];
-  const avgScore = (userData.reduce((a,b)=>a+b,0)/userData.length).toFixed(1);
-  document.getElementById("avg").innerText = avgScore;
-
-  const headerRow = document.getElementById("score-header");
-  const scoreRow = document.getElementById("score-row");
-  labels.forEach((label, idx)=>{
-    const th = document.createElement("th"); th.innerText = label; headerRow.appendChild(th);
-    const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
-  });
-
-  const chartOptions = {
-    animation: false,
-    responsive: false,
-    maintainAspectRatio: true,
-    scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } },
-    plugins: { legend: { display: false } }
-  };
-
-  new Chart(document.getElementById('myChart'), {
-    type: 'radar',
-    data: { labels, datasets: [{ data: userData, backgroundColor: "rgba(52,152,219,0.2)", borderColor: "#3498db", borderWidth: 2 }] },
-    options: chartOptions
-  });
-
-  new Chart(document.getElementById('avgChart'), {
-    type: 'radar',
-    data: { labels, datasets: [{ data: [50,50,50,50,50,50,50], backgroundColor: "rgba(149,165,166,0.1)", borderColor: "#95a5a6", borderWidth: 1, borderDash:[5,5] }] },
-    options: chartOptions
-  });
-
-  window.goBack = () => window.location.href="index.html";
-
-  // DB 저장 기능 구현
-  window.saveToDB = async () => {
-    const targetschool = document.getElementById('target-school').value;
-    const improvement = document.getElementById('improvement-area').value;
-    const comment = document.getElementById('comment-area').value;
-    const recommendStr = artistData[major] || "";
-
-    // 화면 상에 수정된 인적사항 반영하여 저장
-    const updatedClientData = {
-      name: document.getElementById('disp-name').value,
-      age: document.getElementById('disp-age').value,
-      date: document.getElementById('disp-date').value,
-      major: document.getElementById('disp-major').value
+    const artistData = {
+        '드럼': '데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
+        '베이스': '자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
+        '기타': 'Mark Lettieri, Pat Metheny, Norman Brown, John Mayer, Michael Landau, Scott Henderson, Chuck Loeb, Paul Jackson Jr., 적재',
+        '재즈피아노': '오스카피터슨, 칙코리아, 키스자렛, 코리헨리, 허비행콕, 빌에반스, 송영주, 윤석철, 김요한',
+        '보컬': '데미로바토, 마이클부블레, 브루노마스, 아리아나그란데, 아델, 토리켈리, 비욘세, 제이콥콜리어, 존레전드, 김범수, 박효신, 나얼, 박정현, 이소라, 성시경',
+        '작곡': '퀸시존스, 데이빗포스터, 존윌리암스, 한스짐머, 엔니오모니꼬네, 류이치사카모토, 하워드쇼어, 정재일, 모그',
+        '싱송': '선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, 딘, 이적, 장필순',
+        '미디': '아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로'
     };
 
-    const { error } = await supabaseClient.from('students').insert([{
-      ...updatedClientData, scores: savedData, avg: avgScore, targetschool,
-      recommend: recommendStr, improvement, comment
-    }]);
-    
-    if(error) alert("저장 실패 ❌: " + error.message); 
-    else alert("저장 성공 ✅");
-  };
+    window.supabaseClient = supabase.createClient(
+        "https://gnveewglucbnmuvjupst.supabase.co",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
+    );
+
+    const labels = ['초견능력','리듬감','음정감','테크닉','나이','장르의 이해','터치 및 톤'];
+    const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
+    const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
+
+    document.getElementById('disp-name').value = clientData.name || '';
+    document.getElementById('disp-age').value = clientData.age || '';
+    document.getElementById('disp-major').value = clientData.major || '';
+    document.getElementById('disp-date').value = clientData.date || '';
+
+    const major = clientData.major;
+    const recommendDiv = document.getElementById('recommend-content');
+    if (major && artistData[major]) {
+        recommendDiv.innerHTML = artistData[major].split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
+    }
+
+    const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
+                      Number(savedData.e), Number(savedData.f), Number(savedData.g)];
+    const avgScore = (userData.reduce((a,b)=>a+b,0)/userData.length).toFixed(1);
+    document.getElementById("avg").innerText = avgScore;
+
+    const headerRow = document.getElementById("score-header");
+    const scoreRow = document.getElementById("score-row");
+    labels.forEach((label, idx)=>{
+        const th = document.createElement("th"); th.innerText = label; headerRow.appendChild(th);
+        const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
+    });
+
+    const chartOptions = {
+        animation: false,
+        responsive: true,
+        scales: { r: { beginAtZero: true, max: 100, ticks: { display: false }, grid: { color: '#e0e0e0' } } },
+        plugins: { legend: { display: false } }
+    };
+
+    new Chart(document.getElementById('myChart'), {
+        type: 'radar',
+        data: { labels, datasets: [{ data: userData, backgroundColor: "rgba(52,152,219,0.15)", borderColor: "#3498db", borderWidth: 2, pointRadius: 0 }] },
+        options: chartOptions
+    });
+
+    new Chart(document.getElementById('avgChart'), {
+        type: 'radar',
+        data: { labels, datasets: [{ data: [65, 70, 65, 75, 60, 70, 75], backgroundColor: "rgba(44, 62, 80, 0.05)", borderColor: "#2c3e50", borderWidth: 1, borderDash:[5,5], pointRadius: 0 }] },
+        options: chartOptions
+    });
+
+    window.goBack = () => window.location.href="index.html";
+
+    window.saveToDB = async () => {
+        const targetschool = document.getElementById('target-school').value;
+        const improvement = document.getElementById('improvement-area').value;
+        const comment = document.getElementById('comment-area').value;
+        const { error } = await supabaseClient.from('students').insert([{
+            ...clientData, scores: savedData, avg: avgScore, targetschool,
+            recommend: artistData[major] || "", improvement, comment
+        }]);
+        if(error) alert("저장 실패 ❌"); else alert("저장 성공 ✅");
+    };
 });
 </script>
 </body>
