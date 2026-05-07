@@ -99,7 +99,15 @@
 
   <div class="field"><label>이름</label><input type="text" id="name"></div>
   <div class="field"><label>나이</label><input type="text" id="age"></div>
-  <div class="field"><label>전공</label><input type="text" id="major"></div>
+  <div class="field">
+  <label for="major">전공</label>
+  <select id="major">
+    <option value="">전공을 선택하세요</option>
+    <option value="보컬">보컬</option>
+    <option value="기악">기악</option>
+    <option value="작곡">작곡</option>
+  </select>
+</div>
   <div class="field">
   <label>내담일</label>
   <input type="date" id="date">
