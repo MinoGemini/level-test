@@ -140,7 +140,34 @@ input[type=date]::-webkit-calendar-picker-indicator {
   cursor: pointer;
   filter: invert(0.4); /* 조금 연하게 표시 */
 }
+
+select[type=major] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #fefefe;
+  transition: all 0.2s;
+  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+input[type=major]:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 5px rgba(102,126,234,0.5);
+  outline: none;
+}
+input[type=major]::-webkit-inner-spin-button,
+input[type=major]::-webkit-calendar-picker-indicator {
+  display: block;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  filter: invert(0.4); /* 조금 연하게 표시 */
+}
+
 </style>
+
   <div class="field"><label>연락처</label><input type="text" id="phone"></div>
  
   <button onclick="goToTest()">다음 단계: 레벨 테스트</button>
