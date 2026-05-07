@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>경희실용음악 입시 리포트</title>
+
+<!-- 라이브러리 불러오기 -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* 전체 UI 컨테이너 */
+.container {
+  max-width: 1000px;   /* 화면 넓이 제한 */
+  margin: 0 auto;      /* 가운데 정렬 */
+  padding: 20px;       /* 안쪽 여백 */
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #eef2f7;
+  margin: 0;
+  padding: 30px;
+  color: #333;
+}
+
+h1 { text-align:center; margin-bottom:30px; font-weight:bold; color:#2c3e50; }
+
+table {
+  width:100%; 
+  border-collapse:collapse; 
+  margin-bottom:20px;
+  background:white; 
+  border-radius:12px; 
+  overflow:hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08); 
+  page-break-inside: avoid;
+
+  table-layout: fixed; /* ✅ 열 폭 고정 */
+}
+
+th, td { 
+  padding:12px; 
+  text-align:center; 
+  border-bottom:1px solid #eee; 
+}
+
+th { 
+  background:#3498db; 
+  color:white; 
+  font-weight:bold; 
+  font-size:15px; 
+}
+
+input[type=text], textarea { 
+  width: 100%;               /* ✅ 셀 안에서 꽉 채우기 */
+  box-sizing: border-box;    /* ✅ padding 포함 폭 계산 */
+  padding:8px; 
+  border-radius:6px; 
+  border:1px solid #ccc; 
+  font-size:14px; 
+  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+textarea { 
+  resize: vertical; 
+  height:60px; 
+}
+
+/* 그래프 */
+#charts { display:flex; gap:30px; flex-wrap:wrap; justify-content:center; margin-bottom:30px; }
+#charts canvas { width:320px; height:320px; border-radius:15px; background:white; padding:10px; box-shadow:0 6px 15px rgba(0,0,0,0.05); }
+
+button {
+  display:inline-block; 
+  margin:20px 10px; 
+  padding:12px 25px; 
+  border:none;
+  background:#3498db; 
+  color:white; 
+  border-radius:10px; 
+  font-size:16px;
+  cursor:pointer; 
+  font-weight:bold; 
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+button:hover { background:#2980b9; }
+h3 { text-align:center; color:#2c3e50; margin-bottom:10px; font-weight:bold; }
+table th[colspan] { text-align:center; font-size:16px; }
+
+/* A4 출력용 */
+@media print {
+  table td textarea {
+    display: block !important;
+    width: 100% !important;
+    min-height: 60px;
+    text-align: left !important;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: 14px;
+  }
+
+  body { 
+    margin:0; 
+    padding:0; 
+    background:white; 
+    print-color-adjust: exact; 
+    -webkit-print-color-adjust: exact; 
+  }
+
+  #charts canvas { 
+    width:250px !important; 
+    height:250px !important; 
+  }
+
+  button { display:none; }
+  table { page-break-inside: avoid; }
+
+  input {
+    border:none; 
+    background:none; 
+    width:auto; 
+    padding:0; 
+    font-size:14px;
+  }
+}
+</style>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+
+<div class="container">
+<h1>경희실용음악 입시 리포트</h1>
+
+<!-- 내담자 인적사항 -->
+<table>
+  <tr>
+    <th colspan="6">내담자 인적사항</th>
+  </tr>
+
+  <!-- 1행: 이름 / 나이 / 전공 -->
+  <tr>
+    <td>이름</td>
+    <td><input type="text"></td>
+    <td>나이</td>
+    <td><input type="text"></td>
+    <td>전공</td>
+    <td><input type="text"></td>
+  </tr>
+
+  <!-- 2행: 내담일 / 연락처 -->
+  <tr>
+    <td>내담일</td>
+    <td colspan="2"><input type="text"></td>
+    <td>연락처</td>
+    <td colspan="2"><input type="text"></td>
+   </tr>
+
+  <!-- 3행: 주소 -->
+  <tr>
+    <td>주소</td>
+    <td colspan="5"><input type="text"></td>
+  </tr>
+</table>
+
+<!-- 그래프 -->
+<div id="charts">
+  <div>
+    <h3>내 점수</h3>
+    <canvas id="myChart"></canvas>
+  </div>
+  <div>
+    <h3>평균 기준</h3>
+    <canvas id="avgChart"></canvas>
+  </div>
+</div>
+
+<!-- 입시 평가결과 -->
+<table>
+<tr><th colspan="6">입시 평가결과</th></tr>
+<tr>
+<td>목표학교</td><td colspan="2"><input type="text"></td>
+<td>평균 점수</td><td colspan="2"><span id="avg"></span></td>
+</tr>
+</table>
+
+<!-- 각 항목별 점수 -->
+<table>
+<tr><th colspan="7">각 항목별 점수</th></tr>
+<tr id="score-header"></tr>
+<tr id="score-row"></tr>
+</table>
+
+<!-- 추천 입시곡 / 아티스트 -->
+<table>
+<tr><th>추천 입시곡 / 아티스트</th></tr>
+<tr><td><textarea></textarea></td></tr>
+</table>
+
+<!-- 개선 방향 -->
+<table>
+<tr><th>개선 방향</th></tr>
+<tr><td><textarea></textarea></td></tr>
+</table>
+
+<!-- 원장님 소견 -->
+<table>
+<tr><th>원장님 소견</th></tr>
+<tr><td><textarea></textarea></td></tr>
+</table>
+
+<!-- 버튼 -->
+<div class="no-print">
+  <button onclick="goBack()">새로 작성</button>
+  <button onclick="saveToDB()">저장하기</button>
+  <button onclick="window.print()">출력하기</button>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  // SupabaseClient 초기화
+  window.supabaseClient = supabase.createClient(
+    "https://gnveewglucbnmuvjupst.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
+  );
+
+  const labels = ['음악성','음정감','리듬감','무대 자신감','곡 해석력','이론','테크닉'];
+  const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
+  const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:'', phone:'', address:''};
+
+  // 내담자 input만 readonly, 값 채우기
+  const inputs = document.querySelectorAll('table:first-of-type input');
+  inputs.forEach(input => {
+    const label = input.parentElement.previousElementSibling?.innerText;
+    switch(label){
+      case '이름': input.value = clientData.name; break;
+      case '나이': input.value = clientData.age; break;
+      case '전공': input.value = clientData.major; break;
+      case '내담일': input.value = clientData.date; break;
+      case '연락처': input.value = clientData.phone; break;
+      case '주소': input.value = clientData.address; break;
+    }
+    input.readOnly = true;
+  });
+
+  // textarea 입력 가능 (추천곡/개선/소견)
+  // document.querySelectorAll('textarea').forEach(t=>t.readOnly=true);  <-- 제거
+
+  // 점수 테이블
+  const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
+                    Number(savedData.e), Number(savedData.f), Number(savedData.g)];
+  const avgData = [50,50,50,50,50,50,50];
+  const avgScore = (userData.reduce((a,b)=>a+Number(b),0)/userData.length).toFixed(1);
+  document.getElementById("avg").innerText = avgScore;
+
+  // 점수 header
+  const headerRow = document.getElementById("score-header");
+  labels.forEach(label=>{
+    const th = document.createElement("th");
+    th.innerText = label;
+    headerRow.appendChild(th);
+  });
+
+  // 점수 row
+  const scoreRow = document.getElementById("score-row");
+  userData.forEach(score=>{
+    const td = document.createElement("td");
+    td.innerText = score;
+    scoreRow.appendChild(td);
+  });
+
+  // 그래프
+  const commonOptions = {
+    scales:{ r:{ beginAtZero:true, max:100, grid:{color:"#ddd"}, pointLabels:{color:"#2c3e50", font:{size:14, weight:'bold'}} } },
+    plugins:{ legend:{ display:false } }
+  };
+  new Chart(document.getElementById('myChart'),{
+    type:'radar',
+    data:{ labels, datasets:[{ data:userData, backgroundColor:"rgba(52,152,219,0.3)", borderColor:"#2980b9", borderWidth:2, pointBackgroundColor:"#2980b9"}]},
+    options: commonOptions
+  });
+  new Chart(document.getElementById('avgChart'),{
+    type:'radar',
+    data:{ labels, datasets:[{ data:avgData, backgroundColor:"rgba(200,200,200,0.3)", borderColor:"#7f8c8d", borderWidth:2, pointBackgroundColor:"#7f8c8d"}]},
+    options: commonOptions
+  });
+
+  // 버튼 함수
+  window.goBack = () => window.location.href="index.html";
+
+  window.saveToDB = async () => {
+    const avg = (userData.reduce((a,b)=>a+Number(b),0)/7).toFixed(1);
+    const targetschool = document.querySelector('table:nth-of-type(2) input').value;
+
+    const textareas = document.querySelectorAll("textarea");
+    const recommend = textareas[0].value;
+    const improvement = textareas[1].value;
+    const comment = textareas[2].value;
+    const { data, error } = await supabaseClient
+    .from('students')
+    .insert([{
+      ...clientData,
+      scores: savedData,
+      avg,
+      targetschool,
+      recommend,
+      improvement,
+      comment
+    }]);
+    
+    if(error) alert("저장 실패 ❌"); else alert("저장 완료 ✅");
+  };
+
+});
+</script>
+
+</body>
+</html>

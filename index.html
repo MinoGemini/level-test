@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>경희실용음악 입시 리포트 - 내담자 인적사항</title>
+  <style>
+    /* 전체 배경 */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #dbe6f6, #cfdff2); /* test.html과 동일 배경 */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    /* 카드 */
+    .card {
+      background: #fefefe; /* 밝은 카드 */
+      padding: 40px 35px;
+      border-radius: 20px;
+      box-shadow: inset 0 0 15px rgba(0,0,0,0.05), 0 15px 40px rgba(0,0,0,0.15);
+      width: 360px;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.05), 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      font-size: 22px;
+      color: #2c3e50;
+      font-weight: bold;
+    }
+
+    /* 입력 필드 */
+    .field {
+      text-align: left;
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: #555;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    input[type=text] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+
+    input[type=text]:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 5px rgba(102,126,234,0.5);
+      outline: none;
+    }
+
+    /* 버튼 */
+    button {
+      margin-top: 25px;
+      padding: 12px 25px;
+      border: none;
+      background: #667eea;
+      color: white;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      width: 100%;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    button:hover {
+      background: #5a67d8;
+      transform: translateY(-2px);
+    }
+
+    /* 반응형 */
+    @media(max-width:400px){
+      .card { width:90%; padding:30px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <h2>내담자 인적사항 입력</h2>
+
+  <div class="field"><label>이름</label><input type="text" id="name"></div>
+  <div class="field"><label>나이</label><input type="text" id="age"></div>
+  <div class="field"><label>전공</label><input type="text" id="major"></div>
+  <div class="field">
+  <label>내담일</label>
+  <input type="date" id="date">
+</div>
+
+<style>
+input[type=date] {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  background-color: #fefefe;
+  transition: all 0.2s;
+  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+input[type=date]:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 5px rgba(102,126,234,0.5);
+  outline: none;
+}
+
+/* Safari 등 WebKit에서 화살표 제거 */
+input[type=date]::-webkit-inner-spin-button,
+input[type=date]::-webkit-calendar-picker-indicator {
+  display: block;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+  filter: invert(0.4); /* 조금 연하게 표시 */
+}
+</style>
+  <div class="field"><label>연락처</label><input type="text" id="phone"></div>
+  <div class="field"><label>주소</label><input type="text" id="address"></div>
+
+  <button onclick="goToTest()">다음 단계: 레벨 테스트</button>
+</div>
+
+<script>
+function goToTest() {
+  const clientData = {
+    name: document.getElementById('name').value,
+    age: document.getElementById('age').value,
+    major: document.getElementById('major').value,
+    date: document.getElementById('date').value,
+    phone: document.getElementById('phone').value,
+    address: document.getElementById('address').value
+  };
+
+  localStorage.setItem("clientData", JSON.stringify(clientData));
+  window.location.href = "test.html"; // test.html로 이동
+}
+</script>
+
+</body>
+</html>

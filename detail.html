@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>학생 상세</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+ .layout {
+  display: flex;
+  gap: 20px;
+
+  /* ✅ 추가 */
+  align-items: stretch;
+}
+
+.sidebar {
+  width: 250px;
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  /* ✅ 추가 */
+  align-self: flex-start;
+}
+
+.content {
+  flex: 1;
+}
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#studentList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#studentList li {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+
+#studentList li:hover {
+  background: #f5f7fa;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #eef2f7;
+  margin: 0;
+  padding: 30px;
+}
+
+h1 {
+  text-align:center;
+  margin-bottom:30px;
+  color:#2c3e50;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:25px;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
+
+th, td {
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
+
+th {
+  background:#3498db;
+  color:white;
+}
+
+input, textarea {
+  width:100%;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+  font-size:14px; 
+  font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  }
+
+textarea {
+  resize: vertical; 
+  height:60px; 
+}
+
+/* ✅ 그래프 완전 안정 */
+#charts {
+  display:flex;
+  gap:30px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:40px;
+}
+.chart-wrapper {
+  text-align: center;
+}
+.chart-card {
+  width:300px;
+  padding:15px;
+  background:white;
+  border-radius:15px;
+  box-shadow:0 6px 15px rgba(0,0,0,0.05);
+  text-align:center;
+}
+
+canvas {
+  display:block;
+  margin:0 auto;
+}
+
+button {
+  display:inline-block; 
+  margin:20px 10px; 
+  padding:12px 25px; 
+  border:none;
+  background:#3498db; 
+  color:white; 
+  border-radius:10px; 
+  font-size:16px;
+  cursor:pointer; 
+  font-weight:bold; 
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+button:hover { background:#2980b9; }
+h3 { text-align:center; color:#2c3e50; margin-bottom:10px; font-weight:bold; }
+table th[colspan] { text-align:center; font-size:16px; }
+
+
+
+/* A4 출력용 */
+@media print {
+  table td textarea {
+    display: block !important;
+    width: 100% !important;
+    min-height: 60px;
+    text-align: left !important;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: 14px;
+  }
+
+  body { 
+    margin:0; 
+    padding:0; 
+    background:white; 
+    print-color-adjust: exact; 
+    -webkit-print-color-adjust: exact; 
+  }
+
+  #charts canvas { 
+    width:250px !important; 
+    height:250px !important; 
+  }
+
+  button { display:none; }
+  table { page-break-inside: avoid; }
+
+  input {
+    border:none; 
+    background:none; 
+    width:auto; 
+    padding:0; 
+    font-size:14px;
+  }
+}
+
+</style>
+</head>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<body>
+
+<div class="container">
+
+  <div class="layout">
+
+    <!-- ✅ 왼쪽 리스트 -->
+    <div class="sidebar">
+      <h3>학생 리스트</h3>
+      <ul id="studentList"></ul>
+    </div>
+
+   <div class="content">
+<h1>입시 리포트</h1>
+
+<!-- 기본 정보 -->
+<table>
+<tr><th colspan="6">내담자 인적사항</th></tr>
+<tr>
+<td>이름</td><td><input id="name"></td>
+<td>나이</td><td><input id="age"></td>
+<td>전공</td><td><input id="major"></td>
+</tr>
+<tr>
+<td>내담일</td><td colspan="2"><input id="date"></td>
+<td>연락처</td><td colspan="2"><input id="phone"></td>
+</tr>
+<tr>
+<td>주소</td><td colspan="5"><input id="address"></td>
+</tr>
+</table>
+
+<div id="charts">
+
+  <div class="chart-wrapper">
+    <h3>내 점수</h3>
+    <div class="chart-card">
+      <canvas id="myChart"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-wrapper">
+    <h3>평균 기준</h3>
+    <div class="chart-card">
+      <canvas id="avgChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- 입시 결과 -->
+<table>
+<tr><th colspan="6">입시 평가결과</th></tr>
+<tr>
+<td>목표학교</td><td colspan="2"><input id="targetschool"></td>
+<td>평균 점수</td><td colspan="2"><span id="avg"></span></td>
+</tr>
+</table>
+
+<!-- 점수 -->
+<table>
+<tr><th colspan="7">각 항목별 점수</th></tr>
+<tr id="score-header"></tr>
+<tr id="score-row"></tr>
+</table>
+
+<!-- 텍스트 -->
+<table>
+<tr><th>추천 입시곡</th></tr>
+<tr><td><textarea id="recommend"></textarea></td></tr>
+</table>
+
+<table>
+<tr><th>개선 방향</th></tr>
+<tr><td><textarea id="improvement"></textarea></td></tr>
+</table>
+
+<table>
+<tr><th>원장님 소견</th></tr>
+<tr><td><textarea id="comment"></textarea></td></tr>
+</table>
+
+<div style="text-align:left;">
+  <button onclick="goBack()">새로 작성</button>
+  <button onclick="updateData()">수정 저장</button>
+  <button onclick="window.print()">출력하기</button>
+</div>
+
+</div>
+
+<script>
+const supabaseClient = supabase.createClient(
+  "https://gnveewglucbnmuvjupst.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
+);
+
+const data = JSON.parse(localStorage.getItem("selectedStudent"));
+
+// 기본값
+["name","age","major","date","phone","address","targetschool","recommend","improvement","comment"]
+.forEach(id=>{
+  document.getElementById(id).value = data[id] || "";
+});
+
+// 점수
+const labels = ['음악성','음정감','리듬감','무대','해석','이론','테크닉'];
+const keys = ['a','b','c','d','e','f','g'];
+
+const header = document.getElementById("score-header");
+const row = document.getElementById("score-row");
+
+keys.forEach((k,i)=>{
+  header.innerHTML += `<th>${labels[i]}</th>`;
+  row.innerHTML += `<td><input type="number" id="${k}" value="${data.scores?.[k]||0}"></td>`;
+});
+
+// 평균
+function getScores(){
+  return keys.map(k=>Number(document.getElementById(k).value));
+}
+function calcAvg(){
+  return (getScores().reduce((a,b)=>a+b,0)/7).toFixed(1);
+}
+document.getElementById("avg").innerText = calcAvg();
+
+// 🔥 차트 생성 (렌더 안정화 핵심)
+setTimeout(()=>{
+  const options = {
+  scales:{ 
+    r:{ 
+      beginAtZero:true, 
+      max:100, 
+      grid:{color:"#ddd"}, 
+      pointLabels:{
+        color:"#2c3e50", 
+        font:{size:14, weight:'bold'}
+      } 
+    } 
+  },
+  plugins:{ 
+    legend:{ display:false } 
+  }
+};
+
+  let myChart = new Chart(document.getElementById("myChart"),{
+    type:'radar',
+    data:{
+      labels,
+      datasets:[{
+        data:getScores(),
+        backgroundColor:"rgba(52,152,219,0.3)",
+        borderColor:"#2980b9"
+      }]
+    },
+    options
+  });
+
+  new Chart(document.getElementById("avgChart"),{
+    type:'radar',
+    data:{
+      labels,
+      datasets:[{
+        data:[50,50,50,50,50,50,50],
+        backgroundColor:"rgba(200,200,200,0.3)",
+        borderColor:"#7f8c8d"
+      }]
+    },
+    options
+  });
+
+  // 입력 시 업데이트
+  document.querySelectorAll("#score-row input").forEach(input=>{
+    input.addEventListener("input", ()=>{
+      myChart.data.datasets[0].data = getScores();
+      myChart.update();
+      document.getElementById("avg").innerText = calcAvg();
+    });
+  });
+
+}, 100); // 🔥 핵심
+
+// 버튼 함수
+
+window.goBack = () => window.location.href="index.html";
+
+async function updateData(){
+  const newScores = {};
+  keys.forEach(k=>newScores[k]=Number(document.getElementById(k).value));
+
+  const { error } = await supabaseClient
+    .from('students')
+    .update({
+      ...data,
+      scores:newScores,
+      avg:calcAvg()
+    })
+    .eq('id', data.id);
+
+  if(error){
+    alert("수정 실패 ❌");
+  }else{
+    alert("수정 완료 ✅");
+  }
+}
+
+
+
+
+
+
+
+
+//Supabase 학생 리스트
+async function loadList() {
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if(error){
+    alert("리스트 불러오기 실패");
+    return;
+  }
+
+  const list = document.getElementById("studentList");
+  list.innerHTML = "";
+
+  data.forEach(student => {
+    const li = document.createElement("li");
+    li.innerText = student.name + " (" + (student.major || "") + ")";
+
+    li.onclick = () => {
+      loadDetail(student);
+    };
+
+    list.appendChild(li);
+  });
+}
+
+//클릭하면 오른쪽 표시
+
+function loadDetail(data) {
+
+  // 기존 localStorage 대신 바로 값 넣기
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("age").value = data.age || "";
+  document.getElementById("major").value = data.major || "";
+  document.getElementById("date").value = data.date || "";
+  document.getElementById("phone").value = data.phone || "";
+  document.getElementById("address").value = data.address || "";
+
+  document.getElementById("targetschool").value = data.targetschool || "";
+  document.getElementById("recommend").value = data.recommend || "";
+  document.getElementById("improvement").value = data.improvement || "";
+  document.getElementById("comment").value = data.comment || "";
+
+  // 점수도 업데이트
+  const keys = ['a','b','c','d','e','f','g'];
+  keys.forEach(k=>{
+    document.getElementById(k).value = data.scores?.[k] || 0;
+  });
+
+  // 그래프 갱신
+  myChart.data.datasets[0].data = keys.map(k => Number(document.getElementById(k).value));
+  myChart.update();
+
+  document.getElementById("avg").innerText = calcAvg();
+
+  // 현재 선택된 데이터 저장
+  window.currentStudentId = data.id;
+
+}
+
+
+
+</script>
+
+</body>
+</html>

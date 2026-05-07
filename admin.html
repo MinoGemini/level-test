@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>관리자 페이지</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+/* 전체 UI 컨테이너 */
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #eef2f7;
+  margin: 0;
+  padding: 30px;
+  color: #333;
+}
+
+h1 {
+  text-align:center;
+  margin-bottom:30px;
+  font-weight:bold;
+  color:#2c3e50;
+}
+
+/* 테이블 (리포트와 동일) */
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:20px;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
+th, td {
+  padding:12px;
+  text-align:center;
+  border-bottom:1px solid #eee;
+}
+
+th {
+  background:#3498db;
+  color:white;
+  font-weight:bold;
+  font-size:15px;
+}
+
+tr:hover {
+  background:#f5f7fa;
+  cursor:pointer;
+}
+
+/* 버튼 */
+button {
+  display:inline-block;
+  margin:20px 10px;
+  padding:12px 25px;
+  border:none;
+  background:#3498db;
+  color:white;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+  font-weight:bold;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+button:hover {
+  background:#2980b9;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📋 학생 리스트</h1>
+
+<table>
+<thead>
+<tr>
+<th>이름</th>
+<th>전공</th>
+<th>내담일</th>
+<th>평균 점수</th>
+</tr>
+</thead>
+
+<tbody id="list"></tbody>
+</table>
+
+<div style="text-align:center;">
+  <button onclick="location.reload()">새로고침</button>
+</div>
+
+</div>
+
+<script>
+const supabaseClient = supabase.createClient(
+  "https://gnveewglucbnmuvjupst.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
+);
+
+async function loadData() {
+
+  const { data, error } = await supabaseClient
+    .from('students')
+    .select('*')
+    .order('created_at', { ascending:false });
+
+  if(error){
+    console.log(error);
+    alert("불러오기 실패 ❌");
+    return;
+  }
+
+  const tbody = document.getElementById("list");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${row.name || ""}</td>
+      <td>${row.major || ""}</td>
+      <td>${row.date || ""}</td>
+      <td>${row.avg || ""}</td>
+    `;
+
+    // 👉 클릭하면 상세 페이지 이동
+    tr.onclick = () => {
+      localStorage.setItem("selectedStudent", JSON.stringify(row));
+      location.href = "detail.html";
+    };
+
+    tbody.appendChild(tr);
+  });
+}
+
+loadData();
+</script>
+
+</body>
+</html>
