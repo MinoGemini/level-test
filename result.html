@@ -38,9 +38,11 @@ table {
   table-layout: fixed;
 }
 
+/* 모든 제목(th)과 셀(td)을 기본적으로 가운데 정렬 */
 th, td { 
   padding:12px; 
-  text-align:center; 
+  text-align:center; /* ✅ 텍스트 가운데 정렬 */
+  vertical-align: middle;
   border-bottom:1px solid #eee; 
 }
 
@@ -51,28 +53,36 @@ th {
   font-size:15px; 
 }
 
-input[type=text], textarea { 
+/* 입력창 내부 글씨도 가운데 정렬 */
+input[type=text] { 
   width: 100%;
   box-sizing: border-box;
   padding:8px; 
   border-radius:6px; 
   border:1px solid #ccc; 
   font-size:14px; 
+  text-align: center; /* ✅ 입력값 가운데 정렬 */
   font-family: 'Noto Sans KR', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
 }
 
 textarea { 
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
   resize: vertical; 
   height:100px; 
 }
 
-/* 추천 아티스트 출력용 div 스타일 */
+/* 추천 아티스트 출력용 (이 부분만 왼쪽 정렬 유지하여 가독성 확보) */
 #recommend-content {
   text-align: left;
   padding: 10px 5px;
   line-height: 1.6;
   font-size: 15px;
-  white-space: pre-wrap; /* 줄바꿈 유지 */
+  white-space: pre-wrap; 
   word-break: break-all;
   color: #2c3e50;
 }
@@ -96,23 +106,10 @@ button {
 }
 button:hover { background:#2980b9; }
 
-/* A4 출력용 */
 @media print {
   body { padding: 0; background: white; }
   .container { width: 100%; max-width: none; padding: 0; }
-  
-  table td textarea {
-    display: block !important;
-    width: 100% !important;
-    min-height: 80px;
-    text-align: left !important;
-    border: none;
-    background: none;
-    padding: 0;
-  }
-  
   button, .no-print { display:none !important; }
-  table { box-shadow: none; border: 1px solid #ccc; }
 }
 </style>
 </head>
@@ -125,12 +122,12 @@ button:hover { background:#2980b9; }
 <table>
   <tr><th colspan="4">내담자 인적사항</th></tr>
   <tr>
-    <td>이름</td><td><input type="text" id="disp-name"></td>
-    <td>나이</td><td><input type="text" id="disp-age"></td>
+    <td style="font-weight: bold; background: #fafafa;">이름</td><td><input type="text" id="disp-name"></td>
+    <td style="font-weight: bold; background: #fafafa;">나이</td><td><input type="text" id="disp-age"></td>
   </tr>
   <tr>
-    <td>내담일</td><td><input type="text" id="disp-date"></td>
-    <td>전공</td><td><input type="text" id="disp-major"></td>
+    <td style="font-weight: bold; background: #fafafa;">내담일</td><td><input type="text" id="disp-date"></td>
+    <td style="font-weight: bold; background: #fafafa;">전공</td><td><input type="text" id="disp-major"></td>
   </tr>
 </table>
 
@@ -142,15 +139,15 @@ button:hover { background:#2980b9; }
 <table>
   <tr><th colspan="4">입시 평가결과</th></tr>
   <tr>
-    <td>목표학교</td><td><input type="text" id="target-school"></td>
-    <td>평균 점수</td><td><span id="avg"></span></td>
+    <td style="font-weight: bold; background: #fafafa;">목표학교</td><td><input type="text" id="target-school"></td>
+    <td style="font-weight: bold; background: #fafafa;">평균 점수</td><td style="font-weight: bold; color: #e74c3c;"><span id="avg"></span></td>
   </tr>
 </table>
 
 <table>
   <tr><th colspan="7">각 항목별 점수</th></tr>
-  <tr id="score-header"></tr>
-  <tr id="score-row"></tr>
+  <tr id="score-header" style="background: #fafafa;"></tr>
+  <tr id="score-row" style="font-weight: bold;"></tr>
 </table>
 
 <table>
@@ -180,7 +177,6 @@ button:hover { background:#2980b9; }
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. 전공별 아티스트 명단 데이터
   const artistData = {
     '드럼': '• 데이브웨클, 스티브갯, 카즈로드리게스, 아론스피어스, 로버트스팟시라이트, 김승호, 은아경, 조찬우',
     '베이스': '• 자코, 마이클리그, 마커스밀러, 나단이스트, 리차드보나, 에스페란자스팔딩, 구본암, 로비크, 최인성',
@@ -192,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     '미디': '• 아비치, 마틴개릭스, 앨런워커, 제드, 써드파티, 카슈미르, 다비드게타, 체인스모커스, 스크릴렉스, 마시멜로, 스티브아오키, 카이고, 마이크페리, 피독'
   };
 
-  // 2. 초기화 및 데이터 로드
   window.supabaseClient = supabase.createClient(
     "https://gnveewglucbnmuvjupst.supabase.co",
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
@@ -202,22 +197,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const savedData = JSON.parse(localStorage.getItem("myData")) || {a:50,b:50,c:50,d:50,e:50,f:50,g:50};
   const clientData = JSON.parse(localStorage.getItem("clientData")) || {name:'', age:'', major:'', date:''};
 
-  // 3. 인적사항 화면 표시
   document.getElementById('disp-name').value = clientData.name;
   document.getElementById('disp-age').value = clientData.age;
   document.getElementById('disp-major').value = clientData.major;
   document.getElementById('disp-date').value = clientData.date;
 
-  // 4. [중요] 전공별 아티스트 텍스트 출력 (textarea 아님)
   const recommendContent = document.getElementById('recommend-content');
   const userMajor = clientData.major; 
   if (artistData[userMajor]) {
     recommendContent.innerText = artistData[userMajor];
-  } else {
-    recommendContent.innerText = "전공을 확인해 주세요.";
   }
 
-  // 5. 점수 및 그래프 계산
   const userData = [Number(savedData.a), Number(savedData.b), Number(savedData.c), Number(savedData.d),
                     Number(savedData.e), Number(savedData.f), Number(savedData.g)];
   const avgData = [50,50,50,50,50,50,50];
@@ -231,7 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const td = document.createElement("td"); td.innerText = userData[idx]; scoreRow.appendChild(td);
   });
 
-  // 차트 생성
   const commonOptions = {
     scales:{ r:{ beginAtZero:true, max:100, pointLabels:{font:{size:13, weight:'bold'}} } },
     plugins:{ legend:{ display:false } }
@@ -247,7 +236,6 @@ document.addEventListener("DOMContentLoaded", () => {
     options: commonOptions
   });
 
-  // 버튼 기능
   window.goBack = () => window.location.href="index.html";
 
   window.saveToDB = async () => {
@@ -257,21 +245,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const comment = document.getElementById('comment-area').value;
 
     const { error } = await supabaseClient.from('students').insert([{
-      ...clientData, 
-      scores: savedData, 
-      avg: avgScore, 
-      targetschool,
-      recommend, 
-      improvement, 
-      comment
+      ...clientData, scores: savedData, avg: avgScore, targetschool,
+      recommend, improvement, comment
     }]);
 
-    if(error) {
-      console.error(error);
-      alert("저장 실패 ❌");
-    } else {
-      alert("저장 완료 ✅");
-    }
+    if(error) alert("저장 실패 ❌"); else alert("저장 완료 ✅");
   };
 });
 </script>
