@@ -1,153 +1,286 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<title>관리자 페이지</title>
+    <meta charset="UTF-8">
+    <title>경희실용음악 - 리포트 관리 대시보드</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        /* 폰트 및 기본 설정 */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        * { 
+            box-sizing: border-box; 
+            font-family: 'Pretendard', 'Noto Sans KR', sans-serif !important;
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+        body { 
+            background: #f4f7fa; 
+            margin: 0; 
+            padding: 40px 20px; 
+            color: #2c3e50; 
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* 중앙 정렬 */
+        }
 
-<style>
-/* 전체 UI 컨테이너 */
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 20px;
-  box-sizing: border-box;
-}
+        /* 전체 컨테이너 너비 제한 (가운데로 모으기) */
+        .main-container {
+            width: 100%;
+            max-width: 1000px; /* 너무 퍼지지 않게 너비 제한 */
+        }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #eef2f7;
-  margin: 0;
-  padding: 30px;
-  color: #333;
-}
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+        }
 
-h1 {
-  text-align:center;
-  margin-bottom:30px;
-  font-weight:bold;
-  color:#2c3e50;
-}
+        /* 컨트롤 바 스타일링 */
+        .control-bar { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 15px; 
+            display: flex; 
+            gap: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            margin-bottom: 25px; 
+        }
 
-/* 테이블 (리포트와 동일) */
-table {
-  width:100%;
-  border-collapse:collapse;
-  margin-bottom:20px;
-  background:white;
-  border-radius:12px;
-  overflow:hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
+        /* 모든 입력창 폰트 및 디자인 상속 */
+        input, select, textarea, button { 
+            font-family: inherit !important;
+            font-size: 14px; 
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .search-input { flex: 1; }
 
-th, td {
-  padding:12px;
-  text-align:center;
-  border-bottom:1px solid #eee;
-}
+        /* 테이블 디자인 */
+        .table-container { 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            overflow: hidden; 
+        }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { 
+            background: #f8f9fa; 
+            padding: 18px 15px; 
+            border-bottom: 2px solid #edf2f7; 
+            text-align: left; 
+            color: #7f8c8d; 
+            font-size: 13px; 
+            text-transform: uppercase;
+        }
+        td { padding: 18px 15px; border-bottom: 1px solid #edf2f7; font-size: 15px; }
+        
+        .tag { padding: 5px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; background: #ffeaa7; color: #d63031; }
+        
+        .btn-view { background: #3498db; color: white; border: none; cursor: pointer; }
+        .btn-edit { background: #f1c40f; color: white; border: none; cursor: pointer; }
+        .btn-del { background: #ff7675; color: white; border: none; cursor: pointer; }
+        button:hover { opacity: 0.8; transform: translateY(-1px); transition: 0.2s; }
 
-th {
-  background:#3498db;
-  color:white;
-  font-weight:bold;
-  font-size:15px;
-}
-
-tr:hover {
-  background:#f5f7fa;
-  cursor:pointer;
-}
-
-/* 버튼 */
-button {
-  display:inline-block;
-  margin:20px 10px;
-  padding:12px 25px;
-  border:none;
-  background:#3498db;
-  color:white;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-  font-weight:bold;
-  box-shadow:0 4px 12px rgba(0,0,0,0.1);
-}
-button:hover {
-  background:#2980b9;
-}
-</style>
+        /* 수정 모달 스타일 */
+        #edit-modal { 
+            display: none; 
+            position: fixed; 
+            top:0; left:0; 
+            width:100%; height:100%; 
+            background:rgba(0,0,0,0.6); 
+            z-index:1000; 
+            justify-content:center; 
+            align-items:center; 
+        }
+        .modal-content { 
+            background:white; 
+            padding:35px; 
+            border-radius:20px; 
+            width:90%;
+            max-width:550px; 
+            max-height:90vh; 
+            overflow-y:auto; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 12px; 
+            margin: 20px 0; 
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .modal-field { display:flex; flex-direction:column; margin-bottom: 15px; }
+        .modal-field label { font-weight:bold; margin-bottom:8px; font-size:13px; color: #444; }
+        .score-item { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: #f8f9fa; 
+            padding: 10px; 
+            border-radius: 8px; 
+        }
+        .score-item input { width: 65px; text-align: center; border: 1px solid #ddd; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+<div class="main-container">
+    <div class="header">
+        <h1>📊 리포트 관리 시스템</h1>
+        <button onclick="location.href='index.html'" style="padding: 10px 20px; cursor:pointer; background: #2c3e50; color: white; border: none;">🏠 홈으로 이동</button>
+    </div>
 
-<h1>📋 학생 리스트</h1>
+    <div class="control-bar">
+        <input type="text" id="search-input" class="search-input" placeholder="학생 이름을 검색하세요..." onkeyup="filterData()">
+        <select id="major-filter" onchange="filterData()">
+            <option value="">모든 전공</option>
+            <option value="보컬">보컬</option><option value="드럼">드럼</option><option value="기타">기타</option>
+            <option value="베이스">베이스</option><option value="피아노">피아노</option><option value="작곡">작곡</option>
+            <option value="싱송">싱송</option><option value="미디">미디</option>
+        </select>
+    </div>
 
-<table>
-<thead>
-<tr>
-<th>이름</th>
-<th>전공</th>
-<th>내담일</th>
-<th>평균 점수</th>
-</tr>
-</thead>
-
-<tbody id="list"></tbody>
-</table>
-
-<div style="text-align:center;">
-  <button onclick="location.reload()">새로고침</button>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr><th>분석일</th><th>성명</th><th>전공</th><th>목표학교</th><th>평균</th><th>관리</th></tr>
+            </thead>
+            <tbody id="report-list"></tbody>
+        </table>
+    </div>
 </div>
 
+<div id="edit-modal">
+    <div class="modal-content">
+        <h2 style="margin-top:0; font-size: 20px;">📝 정보 및 점수 수정</h2>
+        <input type="hidden" id="edit-id">
+        
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <div class="modal-field"><label>학생 성명</label><input type="text" id="edit-name"></div>
+            <div class="modal-field"><label>목표 학교</label><input type="text" id="edit-target"></div>
+        </div>
+
+        <h4 style="margin: 15px 0 10px 0; color:#3498db; font-size: 15px;">🎯 세부 능력치 (0~100)</h4>
+        <div id="score-edit-grid" class="modal-grid"></div>
+
+        <div class="modal-field"><label>장점 및 보완점</label><textarea id="edit-improvement" rows="3"></textarea></div>
+        <div class="modal-field"><label>원장님 총평</label><textarea id="edit-comment" rows="3"></textarea></div>
+
+        <div style="display:flex; gap:10px; margin-top:25px;">
+            <button onclick="updateReport()" style="flex:1.5; background:#2ecc71; color:white; border:none; padding:15px; border-radius:10px; cursor:pointer; font-weight:bold; font-size: 16px;">저장하기</button>
+            <button onclick="closeEdit()" style="flex:1; background:#95a5a6; color:white; border:none; padding:15px; border-radius:10px; cursor:pointer; font-weight:bold;">취소</button>
+        </div>
+    </div>
 </div>
 
 <script>
-const supabaseClient = supabase.createClient(
-  "https://gnveewglucbnmuvjupst.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk"
-);
+    const SUPABASE_URL = "https://gnveewglucbnmuvjupst.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk";
+    const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function loadData() {
-
-  const { data, error } = await supabaseClient
-    .from('students')
-    .select('*')
-    .order('created_at', { ascending:false });
-
-  if(error){
-    console.log(error);
-    alert("불러오기 실패 ❌");
-    return;
-  }
-
-  const tbody = document.getElementById("list");
-  tbody.innerHTML = "";
-
-  data.forEach(row => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${row.name || ""}</td>
-      <td>${row.major || ""}</td>
-      <td>${row.date || ""}</td>
-      <td>${row.avg || ""}</td>
-    `;
-
-    // 👉 클릭하면 상세 페이지 이동
-    tr.onclick = () => {
-      localStorage.setItem("selectedStudent", JSON.stringify(row));
-      location.href = "detail.html";
+    const fieldConfigs = { 
+        vocal: ['이론', '시창', '음감', '리듬감', '발음', '악기능력', '장르이해', '나이', '톤'], 
+        instrument: ['이론', '초견능력', '리듬감', '음감', '테크닉', '나이', '장르이해', '터치/톤'] 
     };
 
-    tbody.appendChild(tr);
-  });
-}
+    let allReports = [];
 
-loadData();
+    async function fetchReports() {
+        const { data, error } = await _supabase.from('entrance_reports').select('*').order('created_at', { ascending: false });
+        if (error) return;
+        allReports = data;
+        renderTable(allReports);
+    }
+
+    function renderTable(list) {
+        document.getElementById('report-list').innerHTML = list.map(item => `
+            <tr>
+                <td>${item.analysis_date}</td>
+                <td><b>${item.name}</b></td>
+                <td><span class="tag">${item.major}</span></td>
+                <td>${item.target_school || '-'}</td>
+                <td style="color:#e74c3c; font-weight:800;">${item.average_score}</td>
+                <td>
+                    <button class="btn-view" onclick="viewReport('${item.id}', ${JSON.stringify(item.scores).replace(/"/g, '&quot;')}, '${item.name}', '${item.major}', '${item.age}', '${item.analysis_date}')">보기</button>
+                    <button class="btn-edit" onclick='openEdit(${JSON.stringify(item).replace(/'/g, "&apos;")})'>수정</button>
+                    <button class="btn-del" onclick="deleteReport('${item.id}')">삭제</button>
+                </td>
+            </tr>`).join('');
+    }
+
+    function openEdit(item) {
+        document.getElementById('edit-id').value = item.id;
+        document.getElementById('edit-name').value = item.name;
+        document.getElementById('edit-target').value = item.target_school || '';
+        document.getElementById('edit-improvement').value = item.improvement || '';
+        document.getElementById('edit-comment').value = item.final_comment || '';
+
+        const isVocalGroup = (item.major === '보컬' || item.major === '싱송');
+        const labels = isVocalGroup ? fieldConfigs.vocal : fieldConfigs.instrument;
+        const scoreGrid = document.getElementById('score-edit-grid');
+        scoreGrid.innerHTML = '';
+
+        labels.forEach((label, idx) => {
+            const key = String.fromCharCode(97 + idx);
+            const val = item.scores[key] || 0;
+            scoreGrid.innerHTML += `
+                <div class="score-item">
+                    <label>${label}</label>
+                    <input type="number" class="score-input" data-key="${key}" value="${val}" min="0" max="100">
+                </div>`;
+        });
+
+        document.getElementById('edit-modal').style.display = 'flex';
+    }
+
+    async function updateReport() {
+        const id = document.getElementById('edit-id').value;
+        const scoreInputs = document.querySelectorAll('.score-input');
+        const newScores = {};
+        let sum = 0;
+
+        scoreInputs.forEach(input => {
+            const val = Number(input.value);
+            newScores[input.dataset.key] = val;
+            sum += val;
+        });
+
+        const updateData = {
+            name: document.getElementById('edit-name').value,
+            target_school: document.getElementById('edit-target').value,
+            improvement: document.getElementById('edit-improvement').value,
+            final_comment: document.getElementById('edit-comment').value,
+            scores: newScores,
+            average_score: (sum / scoreInputs.length).toFixed(1)
+        };
+
+        const { error } = await _supabase.from('entrance_reports').update(updateData).eq('id', id);
+        if (error) alert("수정 실패");
+        else { alert("성공적으로 수정되었습니다."); closeEdit(); fetchReports(); }
+    }
+
+    function filterData() {
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const major = document.getElementById('major-filter').value;
+        const filtered = allReports.filter(r => r.name.toLowerCase().includes(search) && (major === "" || r.major === major));
+        renderTable(filtered);
+    }
+
+    function viewReport(id, scores, name, major, age, date) {
+        localStorage.setItem("clientData", JSON.stringify({ name, major, age, date }));
+        localStorage.setItem("myData", JSON.stringify(scores));
+        location.href = `result.html?id=${id}`;
+    }
+
+    function closeEdit() { document.getElementById('edit-modal').style.display = 'none'; }
+    async function deleteReport(id) { if(confirm("정말 삭제하시겠습니까?")) { await _supabase.from('entrance_reports').delete().eq('id', id); fetchReports(); } }
+
+    fetchReports();
 </script>
-
 </body>
 </html>
