@@ -29,11 +29,17 @@
 
         .info-input { 
             width: 100%; border: none; background: transparent !important; 
-            font-size: 16px; text-align: center; font-weight: 600; outline: none; box-shadow: none !important;
+            font-size: 16px; text-align: center; font-weight: 600; outline: none;
         }
 
-        /* 텍스트 영역 */
-        textarea { width: 100%; padding: 20px; border: 1px solid #dcdde1; font-size: 15px; line-height: 1.8; resize: none; height: 180px; background: #fdfdfd; outline: none; }
+        /* 텍스트 영역 - 실시간 수정 강조 */
+        textarea { 
+            width: 100%; padding: 20px; border: 1px solid #dcdde1; font-size: 15px; 
+            line-height: 1.8; resize: none; height: 180px; background: #fff; outline: none;
+            transition: all 0.3s;
+        }
+        textarea:focus { border: 1px solid var(--accent-color); background: #fcfdfe; }
+
         .print-text-area { display: none; text-align: left; padding: 20px; font-size: 15px; line-height: 1.8; white-space: pre-wrap; word-break: break-all; min-height: 150px; border: 1px solid #dcdde1; }
         
         /* 차트 레이아웃 */
@@ -42,9 +48,6 @@
         canvas { max-width: 280px !important; max-height: 280px !important; margin: 0 auto; }
 
         .artist-tag { display: inline-block; background: #f1f2f6; color: #2f3542; padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600; margin: 3px; border: 1px solid #dfe4ea; }
-
-        /* 페이지 분할 포인트 설정 */
-        .page-break { page-break-before: always; }
 
         /* 버튼 설정 */
         .button-group { text-align: center; margin-top: 40px; display: flex; justify-content: center; gap: 10px; }
@@ -58,11 +61,7 @@
             .no-print { display: none !important; }
             textarea { display: none !important; }
             .print-text-area { display: block !important; }
-            
-            /* 2페이지 시작점 강제 지정 */
             .recommend-section { page-break-before: always; margin-top: 50px; }
-            
-            /* 인쇄 시 테이블 헤더 색상 유지 */
             th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .info-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
         }
@@ -71,6 +70,7 @@
 <body>
 
 <div class="container">
+    <!-- 1페이지 -->
     <div class="report-header">
         <div>
             <div class="sub-title">KYUNGHEE MUSIC ACADEMY</div>
@@ -110,6 +110,7 @@
         <tr id="score-row" style="font-weight: 800; color: var(--accent-color);"></tr>
     </table>
 
+    <!-- 2페이지 시작 -->
     <div class="recommend-section">
         <table>
             <tr><th style="text-align: left; padding-left: 20px; background: var(--primary-color); color: white;">추천 입시곡 및 아티스트 가이드</th></tr>
@@ -139,82 +140,106 @@
         <div style="text-align: center; margin-top: 50px; font-weight: 800; font-size: 20px; letter-spacing: 2px; color: var(--primary-color);">경희실용음악학원</div>
     </div>
 
+    <!-- 버튼 그룹 -->
     <div class="button-group no-print">
-        <button onclick="location.href='index.html'" style="background: #95a5a6;">처음으로</button>
-        <button id="save-print-btn" onclick="saveAndPrint()" style="background: var(--accent-color); flex: 1; max-width: 300px;">
-            💾 저장 후 리포트 인쇄하기
+        <button onclick="location.href='admin.html'" style="background: #95a5a6;">목록으로</button>
+        <button id="save-only-btn" onclick="saveDataOnly()" style="background: #3498db; flex: 1; max-width: 200px;">
+            💾 수정 내용 저장
+        </button>
+        <button id="save-print-btn" onclick="saveAndPrint()" style="background: #2ecc71; flex: 1; max-width: 250px;">
+            🖨️ 저장 후 리포트 인쇄
         </button>
     </div>
 </div>
 
 <script>
-// (스크립트 부분은 기존과 동일하되, syncText 함수가 원활하게 작동하도록 유지합니다)
 const SUPABASE_URL = "https://gnveewglucbnmuvjupst.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdudmVld2dsdWNibm11dmp1cHN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Mjk1OTgsImV4cCI6MjA4OTMwNTU5OH0.9bu4YcGX1DM4gxy1vPr2KclJV7KIhgLStLs9eEZdXuk";
 const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const urlParams = new URLSearchParams(window.location.search);
+const reportId = urlParams.get('id');
 
 function syncText(textarea, targetId) {
     document.getElementById(targetId).innerText = textarea.value;
 }
 
-async function saveAndPrint() {
+// 공통 저장 로직
+async function performSave() {
     const clientData = JSON.parse(localStorage.getItem("clientData"));
     const savedScores = JSON.parse(localStorage.getItem("myData"));
-    if(!clientData || !savedScores) return;
+    
+    const updateData = {
+        name: clientData.name,
+        major: clientData.major,
+        age: clientData.age,
+        analysis_date: clientData.date,
+        target_school: document.getElementById('target-school').value,
+        scores: savedScores,
+        improvement: document.getElementById('improvement-area').value,
+        final_comment: document.getElementById('comment-area').value,
+        average_score: document.getElementById('avg').innerText
+    };
 
-    const btn = document.getElementById('save-print-btn');
-    const originalText = btn.innerText;
-    btn.disabled = true;
-    btn.innerText = "데이터 저장 중...";
-
-    try {
-        const { error } = await _supabase.from('entrance_reports').insert([{
-            name: clientData.name,
-            major: clientData.major,
-            age: clientData.age,
-            analysis_date: clientData.date,
-            target_school: document.getElementById('target-school').value,
-            scores: savedScores,
-            improvement: document.getElementById('improvement-area').value,
-            final_comment: document.getElementById('comment-area').value,
-            average_score: document.getElementById('avg').innerText
-        }]);
-
-        if (error) throw error;
-        btn.innerText = "저장 완료! 인쇄 중...";
-        setTimeout(() => { window.print(); btn.disabled = false; btn.innerText = originalText; }, 800);
-    } catch (err) {
-        alert("저장 실패: " + err.message);
-        btn.disabled = false; btn.innerText = originalText;
+    if (reportId) {
+        return await _supabase.from('entrance_reports').update(updateData).eq('id', reportId);
+    } else {
+        return await _supabase.from('entrance_reports').insert([updateData]);
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const artistData = {
-        '보컬': 'Beyoncé, Adele, Bruno Mars, Ariana Grande, Tori Kelly, Jacob Collier, Sam Smith, 김범수, 박효신, 나얼, 박정현, 이소라',
-        '싱송': 'Ed Sheeran, John Mayer, Tom Misch, Sara Bareilles, 선우정아, 유재하, 이적, 김동률, 안예은, 이무진, 권진아',
-        '드럼': 'Steve Gadd, Dave Weckl, Vinnie Colaiuta, Benny Greb, Anika Nilles, Chris Coleman, Larnell Lewis',
-        '베이스': 'Jaco Pastorius, Marcus Miller, Victor Wooten, Nathan East, Pino Palladino, Esperanza Spalding, Richard Bona',
-        '기타': 'Mark Lettieri, Pat Metheny, Norman Brown, John Mayer, Michael Landau, Scott Henderson, Chuck Loeb, Paul Jackson Jr., 적재',
-        '피아노': 'Bill Evans, Keith Jarrett, Chick Corea, Herbie Hancock, Oscar Peterson, Michel Petrucciani, Hiromi Uehara',
-        '작곡': 'David Foster, Quincy Jones, Ryuichi Sakamoto, Joe Hisaishi, Burt Bacharach, 김형석, 윤상, 이영훈',
-        '미디': 'Avicii, Skrillex, Zedd, Madeon, Disclosure, Kaytranada, Charlie Puth, 딘(DEAN), 250'
-    };
+async function saveDataOnly() {
+    const btn = document.getElementById('save-only-btn');
+    btn.disabled = true; btn.innerText = "저장 중...";
+    try {
+        const { error } = await performSave();
+        if (error) throw error;
+        alert("데이터가 성공적으로 저장되었습니다.");
+    } catch (err) { alert("저장 실패: " + err.message); }
+    finally { btn.disabled = false; btn.innerText = "💾 수정 내용 저장"; }
+}
 
-    const fieldConfigs = { 
-        vocal: ['이론', '시창', '음감', '리듬감', '발음', '악기능력', '장르이해', '나이', '톤'], 
-        instrument: ['이론', '초견능력', '리듬감', '음감', '테크닉', '나이', '장르이해', '터치/톤'] 
-    };
+async function saveAndPrint() {
+    const btn = document.getElementById('save-print-btn');
+    btn.disabled = true; btn.innerText = "저장 중...";
+    try {
+        const { error } = await performSave();
+        if (error) throw error;
+        setTimeout(() => { window.print(); btn.disabled = false; btn.innerText = "🖨️ 저장 후 리포트 인쇄"; }, 500);
+    } catch (err) { alert("저장 실패: " + err.message); btn.disabled = false; btn.innerText = "🖨️ 저장 후 리포트 인쇄"; }
+}
 
+document.addEventListener("DOMContentLoaded", async () => {
     const savedData = JSON.parse(localStorage.getItem("myData"));
     const clientData = JSON.parse(localStorage.getItem("clientData"));
     if(!savedData || !clientData) return;
 
+    // 기본 정보 표시
     document.getElementById('disp-name').value = clientData.name;
     document.getElementById('disp-major').value = clientData.major;
     document.getElementById('disp-age').value = clientData.age;
     document.getElementById('disp-date').value = clientData.date;
+    
+    // index.html에서 입력한 목표 학교 정보 우선 로드
+    document.getElementById('target-school').value = clientData.targetSchool || "";
 
+    // DB 데이터 로드 (수정 모드일 때 - DB에 저장된 기록이 있으면 덮어씌움)
+    if (reportId) {
+        const { data } = await _supabase.from('entrance_reports').select('*').eq('id', reportId).single();
+        if (data) {
+            if(data.target_school) document.getElementById('target-school').value = data.target_school;
+            document.getElementById('improvement-area').value = data.improvement || "";
+            document.getElementById('comment-area').value = data.final_comment || "";
+            syncText(document.getElementById('improvement-area'), 'print-improvement');
+            syncText(document.getElementById('comment-area'), 'print-comment');
+        }
+    }
+
+    // 차트 및 테이블 로직
+    const fieldConfigs = { 
+        vocal: ['이론', '시창', '음감', '리듬감', '발음', '악기능력', '장르이해', '나이', '톤'], 
+        instrument: ['이론', '초견능력', '리듬감', '음감', '테크닉', '나이', '장르이해', '터치/톤'] 
+    };
     const isVocalGroup = (clientData.major === '보컬' || clientData.major === '싱송');
     const currentLabels = isVocalGroup ? fieldConfigs.vocal : fieldConfigs.instrument;
     const userData = currentLabels.map((_, idx) => Number(savedData[String.fromCharCode(97 + idx)] || 0));
@@ -227,12 +252,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.getElementById("avg").innerText = (userData.reduce((a, b) => a + b, 0) / userData.length).toFixed(1);
-    const recommendDiv = document.getElementById('recommend-content');
-    recommendDiv.innerHTML = (artistData[clientData.major] || "").split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
 
     const chartOptions = { scales: { r: { beginAtZero: true, max: 100, ticks: { display: false } } }, plugins: { legend: { display: false } }, animation: false };
     new Chart(document.getElementById('myChart'), { type: 'radar', data: { labels: currentLabels, datasets: [{ data: userData, backgroundColor: "rgba(52,152,219,0.15)", borderColor: "#3498db", borderWidth: 2, pointRadius: 0 }] }, options: chartOptions });
     new Chart(document.getElementById('avgChart'), { type: 'radar', data: { labels: currentLabels, datasets: [{ data: currentLabels.map(() => 50), backgroundColor: "rgba(44, 62, 80, 0.05)", borderColor: "#2c3e50", borderWidth: 1, borderDash:[5,5], pointRadius: 0 }] }, options: chartOptions });
+
+    const artistData = { '보컬': 'Beyoncé, Adele, Bruno Mars, 박효신, 김범수', '싱송': 'Ed Sheeran, John Mayer, 선우정아', '드럼': 'Steve Gadd, Dave Weckl', '베이스': 'Jaco Pastorius, Marcus Miller', '기타': 'Mark Lettieri, 적재', '피아노': 'Bill Evans, Keith Jarrett', '작곡': 'David Foster, Ryuichi Sakamoto', '미디': 'Avicii, Zedd' };
+    const recommendDiv = document.getElementById('recommend-content');
+    recommendDiv.innerHTML = (artistData[clientData.major] || "").split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
 });
 </script>
 </body>
