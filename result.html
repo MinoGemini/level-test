@@ -32,7 +32,7 @@
             font-size: 16px; text-align: center; font-weight: 600; outline: none;
         }
 
-        /* 텍스트 영역 - 실시간 수정 강조 */
+        /* 텍스트 영역 */
         textarea { 
             width: 100%; padding: 20px; border: 1px solid #dcdde1; font-size: 15px; 
             line-height: 1.8; resize: none; height: 180px; background: #fff; outline: none;
@@ -70,7 +70,6 @@
 <body>
 
 <div class="container">
-    <!-- 1페이지 -->
     <div class="report-header">
         <div>
             <div class="sub-title">KYUNGHEE MUSIC ACADEMY</div>
@@ -99,7 +98,8 @@
         <tr><th colspan="4" style="background: var(--primary-color); color: white;">종합 평가 지표</th></tr>
         <tr>
             <td class="info-label">목표 학교</td>
-            <td><input type="text" id="target-school" class="info-input" style="text-align: left; padding-left: 15px;" placeholder="지망 학교 입력"></td>
+            <!-- readonly 속성 추가 -->
+            <td><input type="text" id="target-school" class="info-input" style="text-align: left; padding-left: 15px;" readonly></td>
             <td class="info-label">평가 총점</td>
             <td style="font-weight: 800; color: #e74c3c; font-size: 1.6em;"><span id="avg">0.0</span></td>
         </tr>
@@ -110,7 +110,6 @@
         <tr id="score-row" style="font-weight: 800; color: var(--accent-color);"></tr>
     </table>
 
-    <!-- 2페이지 시작 -->
     <div class="recommend-section">
         <table>
             <tr><th style="text-align: left; padding-left: 20px; background: var(--primary-color); color: white;">추천 입시곡 및 아티스트 가이드</th></tr>
@@ -136,19 +135,13 @@
                 </td>
             </tr>
         </table>
-
         <div style="text-align: center; margin-top: 50px; font-weight: 800; font-size: 20px; letter-spacing: 2px; color: var(--primary-color);">경희실용음악학원</div>
     </div>
 
-    <!-- 버튼 그룹 -->
     <div class="button-group no-print">
         <button onclick="location.href='admin.html'" style="background: #95a5a6;">목록으로</button>
-        <button id="save-only-btn" onclick="saveDataOnly()" style="background: #3498db; flex: 1; max-width: 200px;">
-            💾 수정 내용 저장
-        </button>
-        <button id="save-print-btn" onclick="saveAndPrint()" style="background: #2ecc71; flex: 1; max-width: 250px;">
-            🖨️ 저장 후 리포트 인쇄
-        </button>
+        <button id="save-only-btn" onclick="saveDataOnly()" style="background: #3498db; flex: 1; max-width: 200px;">💾 수정 내용 저장</button>
+        <button id="save-print-btn" onclick="saveAndPrint()" style="background: #2ecc71; flex: 1; max-width: 250px;">🖨️ 저장 후 리포트 인쇄</button>
     </div>
 </div>
 
@@ -164,7 +157,6 @@ function syncText(textarea, targetId) {
     document.getElementById(targetId).innerText = textarea.value;
 }
 
-// 공통 저장 로직
 async function performSave() {
     const clientData = JSON.parse(localStorage.getItem("clientData"));
     const savedScores = JSON.parse(localStorage.getItem("myData"));
@@ -214,16 +206,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     const clientData = JSON.parse(localStorage.getItem("clientData"));
     if(!savedData || !clientData) return;
 
-    // 기본 정보 표시
     document.getElementById('disp-name').value = clientData.name;
     document.getElementById('disp-major').value = clientData.major;
     document.getElementById('disp-age').value = clientData.age;
     document.getElementById('disp-date').value = clientData.date;
-    
-    // index.html에서 입력한 목표 학교 정보 우선 로드
     document.getElementById('target-school').value = clientData.targetSchool || "";
 
-    // DB 데이터 로드 (수정 모드일 때 - DB에 저장된 기록이 있으면 덮어씌움)
     if (reportId) {
         const { data } = await _supabase.from('entrance_reports').select('*').eq('id', reportId).single();
         if (data) {
@@ -235,7 +223,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     }
 
-    // 차트 및 테이블 로직
     const fieldConfigs = { 
         vocal: ['이론', '시창', '음감', '리듬감', '발음', '악기능력', '장르이해', '나이', '톤'], 
         instrument: ['이론', '초견능력', '리듬감', '음감', '테크닉', '나이', '장르이해', '터치/톤'] 
@@ -257,9 +244,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     new Chart(document.getElementById('myChart'), { type: 'radar', data: { labels: currentLabels, datasets: [{ data: userData, backgroundColor: "rgba(52,152,219,0.15)", borderColor: "#3498db", borderWidth: 2, pointRadius: 0 }] }, options: chartOptions });
     new Chart(document.getElementById('avgChart'), { type: 'radar', data: { labels: currentLabels, datasets: [{ data: currentLabels.map(() => 50), backgroundColor: "rgba(44, 62, 80, 0.05)", borderColor: "#2c3e50", borderWidth: 1, borderDash:[5,5], pointRadius: 0 }] }, options: chartOptions });
 
-    const artistData = { '보컬': 'Beyoncé, Adele, Bruno Mars, 박효신, 김범수', '싱송': 'Ed Sheeran, John Mayer, 선우정아', '드럼': 'Steve Gadd, Dave Weckl', '베이스': 'Jaco Pastorius, Marcus Miller', '기타': 'Mark Lettieri, 적재', '피아노': 'Bill Evans, Keith Jarrett', '작곡': 'David Foster, Ryuichi Sakamoto', '미디': 'Avicii, Zedd' };
+    const artistData = {
+        '보컬': 'Beyoncé, Adele, Bruno Mars, Demi Lovato, Michael Bublé, Ariana Grande, Tori Kelly, Jacob Collier, John Legend, Jamie Cullum, Charlie Puth, Justin Bieber, Justin Timberlake, 박효신, 김범수, 나얼, 박정현, 이소라, 성시경, 정승환, 김동률, 미노이',
+        '싱송': 'Ed Sheeran, John Mayer, 선우정아, 윤종신, 유재하, 유희열, 윤상, 안예은, 윤딴딴, 이무진, 볼빨간사춘기, 아이유, DEAN, 이적, 장필순',
+        '드럼': 'Steve Gadd, Dave Weckl, Kaz Rodriguez, Aaron Spears, Robert "Sput" Searight, 김승호, 은아경, 조찬우',
+        '베이스': 'Jaco Pastorius, Michael League, Marcus Miller, Nathan East, Richard Bona, Esperanza Spalding, 구본암, 로비크, 최인성',
+        '기타': 'Mark Lettieri, Pat Metheny, Norman Brown, John Mayer, Michael Landau, Scott Henderson, Chuck Loeb, Paul Jackson Jr., 적재',
+        '피아노': 'Oscar Peterson, Chick Corea, Keith Jarrett, Cory Henry, Herbie Hancock, Bill Evans, 송영주, 윤석철, 김요한',
+        '작곡': 'Quincy Jones, David Foster, John Williams, Hans Zimmer, Ennio Morricone, Ryuichi Sakamoto, Howard Shore, 정재일, 모그',
+        '미디': 'Avicii, Martin Garrix, Alan Walker, Zedd, Third Party, KSHMR, David Guetta, The Chainsmokers, Skrillex, Marshmello, Steve Aoki, Kygo, Mike Perry, Pdogg'
+    };
+    
     const recommendDiv = document.getElementById('recommend-content');
-    recommendDiv.innerHTML = (artistData[clientData.major] || "").split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
+    const targetArtists = artistData[clientData.major] || "";
+    if (targetArtists) {
+        recommendDiv.innerHTML = targetArtists.split(', ').map(n => `<span class="artist-tag"># ${n}</span>`).join('');
+    }
 });
 </script>
 </body>
